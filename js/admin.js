@@ -414,16 +414,18 @@ class AdminDashboard {
                             if (addressField) addressField.value = studentData.address || '';
                             
                             // Xử lý ngày sinh
-                            if (dobField && studentData.dob) {
-                                let dobValue = studentData.dob;
+                            if (dobField) {
+                                let dobValue = studentData.dateOfBirth || studentData.dob || '';
                                 // Cắt thời gian nếu cần thiết
-                                if (dobValue.includes('T')) {
+                                if (dobValue && dobValue.includes('T')) {
                                     dobValue = dobValue.split('T')[0];
                                 }
                                 dobField.value = dobValue;
                             }
                             
-                            if (phoneField) phoneField.value = studentData.phone || '';
+                            // Modify these lines to match the API response field names
+                            if (phoneField) phoneField.value = studentData.phoneNumber || studentData.phone || '';
+                            
                             if (passwordField) passwordField.value = studentData.password || '';
                             
                             // Đặt giá trị cho lớp học
@@ -707,16 +709,18 @@ class AdminDashboard {
                             if (addressField) addressField.value = teacherData.address || '';
                             
                             // Xử lý ngày sinh
-                            if (dobField && teacherData.dob) {
-                                let dobValue = teacherData.dob;
+                            if (dobField) {
+                                let dobValue = teacherData.dateOfBirth || teacherData.dob || '';
                                 // Cắt thời gian nếu cần thiết
-                                if (dobValue.includes('T')) {
+                                if (dobValue && dobValue.includes('T')) {
                                     dobValue = dobValue.split('T')[0];
                                 }
                                 dobField.value = dobValue;
                             }
                             
-                            if (phoneField) phoneField.value = teacherData.phone || '';
+                            // Modify these lines to match the API response field names
+                            if (phoneField) phoneField.value = teacherData.phoneNumber || teacherData.phone || '';
+                            
                             if (passwordField) passwordField.value = teacherData.password || '';
                             
                             // Log các trường đã điền
@@ -838,7 +842,7 @@ class AdminDashboard {
     }
 
 
-    async  loadCohorts() {
+    async loadCohorts() {
         try {
             const response = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts');
             const data = await response.json();
@@ -1065,8 +1069,8 @@ class AdminDashboard {
                             const descriptionField = form.querySelector('[name="description"]');
                             
                             // Điền dữ liệu vào từng trường nếu trường tồn tại và có dữ liệu
-                            if (nameField) nameField.value = cohortData.name || cohortData.CName || '';
-                            if (descriptionField) descriptionField.value = cohortData.description || cohortData.Description || '';
+                            if (nameField) nameField.value = cohortData.cohortName;
+                            if (descriptionField) descriptionField.value = cohortData.description;
                             
                             // Log các trường đã điền
                             console.log('Form filled with the following values:', {
@@ -1576,17 +1580,63 @@ class AdminDashboard {
         const modal = document.getElementById('assignmentModal');
         const form = document.getElementById('assignmentForm');
         console.log("Lesson Class ID:", lessonClassId);
+        
+        // Get all date input fields from the form
+        const dateInputs = form.querySelectorAll('input[type="date"]');
+        console.log("Date input fields in form:", Array.from(dateInputs).map(el => el.name));
+        
         if (lessonClassId) {
             const response = await fetch(`https://localhost:7231/RealAdmins/GetLessonSchedulebyID?id=${lessonClassId}`);
             const assignmentArray = await response.json();
             const assignment = assignmentArray[0]; // Access the first item in the array
-            console.log("Lesson Class ID:", assignment.lessonClassId);
-        
+            console.log("Raw assignment data:", assignment);
+            
+            // Log all date fields in response
+            Object.keys(assignment).forEach(key => {
+                if (typeof assignment[key] === 'string' && assignment[key].includes('T')) {
+                    console.log(`Field "${key}" contains date value: ${assignment[key]}`);
+                }
+            });
+            
+            // First, try to map fields directly
             Object.keys(assignment).forEach(key => {
                 const input = form.querySelector(`[name="${key}"]`);
-                if (input) input.value = assignment[key];
-                console.log("Key:", key, "Value:", assignment[key]);
+                if (input) {
+                    // Special handling for date fields
+                    if (key === "lessonDate" && input.type === "date") {
+                        if (assignment[key] && assignment[key].includes('T')) {
+                            input.value = assignment[key].split('T')[0];
+                        } else {
+                            input.value = assignment[key] || '';
+                        }
+                        console.log(`Set date field ${key} = ${input.value}`);
+                    } else {
+                        input.value = assignment[key] || '';
+                    }
+                }
             });
+            
+            // Special case - if startDay field exists but lessonDate isn't mapped
+            const startDayInput = form.querySelector('[name="startDay"]');
+            if (startDayInput && assignment.lessonDate) {
+                if (assignment.lessonDate.includes('T')) {
+                    startDayInput.value = assignment.lessonDate.split('T')[0];
+                } else {
+                    startDayInput.value = assignment.lessonDate;
+                }
+                console.log(`Set startDay = ${startDayInput.value} from lessonDate`);
+            }
+            
+            // Or the other way around
+            const lessonDateInput = form.querySelector('[name="lessonDate"]');
+            if (lessonDateInput && assignment.startDay) {
+                if (assignment.startDay.includes('T')) {
+                    lessonDateInput.value = assignment.startDay.split('T')[0];
+                } else {
+                    lessonDateInput.value = assignment.startDay;
+                }
+                console.log(`Set lessonDate = ${lessonDateInput.value} from startDay`);
+            }
         } else {
             form.reset();
         }

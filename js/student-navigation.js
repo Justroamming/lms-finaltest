@@ -3,6 +3,7 @@ class Navigation {
         this.currentPage = 'dashboard';
         this.initializeNavigation();
         this.initializeMobileMenu();
+        this.displayStudentName();
     }
 
     initializeNavigation() {
@@ -116,6 +117,27 @@ class Navigation {
         const activeLink = document.querySelector(`.sidebar a[href="#${page}"]`);
         if (activeLink) {
             activeLink.parentElement.classList.add('active');
+        }
+    }
+
+    // Hiển thị tên học sinh trong header
+    displayStudentName() {
+        const student = JSON.parse(sessionStorage.getItem('currentUser'));
+        const studentNameElement = document.getElementById('studentName');
+        
+        if (student && studentNameElement) {
+            const fullnameElement = studentNameElement.querySelector('.student-fullname');
+            const roleElement = studentNameElement.querySelector('.student-role');
+            
+            if (fullnameElement) {
+                fullnameElement.textContent = `${student.lastName} ${student.firstName}`;
+            }
+            
+            if (roleElement) {
+                // Hiển thị vai trò học sinh và lớp (nếu có)
+                const className = student.className || "10A1";
+                roleElement.textContent = `Học sinh ${className}`;
+            }
         }
     }
 }

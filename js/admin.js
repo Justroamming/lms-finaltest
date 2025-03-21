@@ -231,9 +231,9 @@ class AdminDashboard {
 
             // Tìm lớp đông nhất và ít nhất
             if (cohortStats.length > 0) {
-                const sortedCohorts = cohortStats.sort((a, b) => b.count - a.count);
-                const largest = sortedCohorts[0];
-                const smallest = sortedCohorts[sortedCohorts.length - 1];
+            const sortedCohorts = cohortStats.sort((a, b) => b.count - a.count);
+            const largest = sortedCohorts[0];
+            const smallest = sortedCohorts[sortedCohorts.length - 1];
 
                 const largestClassElement = document.getElementById('largestClass');
                 const smallestClassElement = document.getElementById('smallestClass');
@@ -995,8 +995,8 @@ class AdminDashboard {
                                 <i class="fas fa-trash"></i>
                             </button>
                             <button class="btn-print" data-id="${co.cohortId}">
-                                <i class="fas fa-print"></i> Print
-                            </button>
+                            <i class="fas fa-print"></i> Print
+                        </button>
                         </td>
                     </tr>
                 `;
@@ -1402,7 +1402,7 @@ class AdminDashboard {
         document.getElementById('addSubjectBtn')?.addEventListener('click', () => {
             this.openSubjectModal();
         });
-    
+
         document.getElementById('searchSubject')?.addEventListener('input', (e) => {
             this.searchSubjects(e.target.value);
         });
@@ -1859,21 +1859,21 @@ class AdminDashboard {
                 'Xác nhận xóa phân công',
                 'Bạn có chắc chắn muốn xóa phân công này không? Dữ liệu không thể khôi phục sau khi xóa.',
                 async () => {
-                    try {
-                        const response = await fetch(`https://localhost:7231/RealAdmins/DeleteAssignedTeacher?lessonClassID=${lessonClassId}`, {
-                            method: 'DELETE'
-                        });
+        try {
+            const response = await fetch(`https://localhost:7231/RealAdmins/DeleteAssignedTeacher?lessonClassID=${lessonClassId}`, {
+                method: 'DELETE'
+            });
 
-                        if (!response.ok) throw new Error('Failed to delete assignment');
+            if (!response.ok) throw new Error('Failed to delete assignment');
 
-                        await this.loadAssignments();
+            await this.loadAssignments();
                         this.showNotification(
                             'success',
                             'Xóa phân công thành công',
                             'Phân công đã được xóa khỏi hệ thống.'
                         );
-                    } catch (error) {
-                        console.error("Lỗi khi xóa phân công:", error);
+        } catch (error) {
+            console.error("Lỗi khi xóa phân công:", error);
                         this.showNotification(
                             'error',
                             'Lỗi xóa phân công',
@@ -2014,7 +2014,7 @@ class AdminDashboard {
             switch(modalId) {
                 case 'studentModal':
                     newForm.addEventListener('submit', (e) => {
-                        e.preventDefault();
+                e.preventDefault();
                         this.saveStudent();
                     });
                     break;
@@ -2242,23 +2242,23 @@ class AdminDashboard {
             return;
         }
         
-        // Cập nhật nội dung
-        confirmTitle.textContent = title || 'Xác nhận thao tác';
-        confirmMessage.textContent = message || 'Bạn có chắc chắn muốn thực hiện thao tác này?';
-        
-        // Xóa sự kiện click cũ
-        const newConfirmButton = confirmButton.cloneNode(true);
-        confirmButton.parentNode.replaceChild(newConfirmButton, confirmButton);
-        
-        // Thêm sự kiện click mới
-        newConfirmButton.addEventListener('click', () => {
+            // Cập nhật nội dung
+            confirmTitle.textContent = title || 'Xác nhận thao tác';
+            confirmMessage.textContent = message || 'Bạn có chắc chắn muốn thực hiện thao tác này?';
+            
+            // Xóa sự kiện click cũ
+            const newConfirmButton = confirmButton.cloneNode(true);
+            confirmButton.parentNode.replaceChild(newConfirmButton, confirmButton);
+            
+            // Thêm sự kiện click mới
+            newConfirmButton.addEventListener('click', () => {
             console.log('Confirm button clicked');
-            this.hideConfirmation();
-            if (typeof onConfirm === 'function') {
-                onConfirm();
-            }
-        });
-        
+                this.hideConfirmation();
+                if (typeof onConfirm === 'function') {
+                    onConfirm();
+                }
+            });
+            
         // Xử lý sự kiện hủy
         if (cancelButton) {
             const newCancelButton = cancelButton.cloneNode(true);
@@ -2275,7 +2275,7 @@ class AdminDashboard {
         confirmationPopup.style.opacity = '1';
         confirmationPopup.style.visibility = 'visible';
         confirmationPopup.style.zIndex = '9999';
-        confirmationPopup.classList.add('show');
+            confirmationPopup.classList.add('show');
         
         // Debug thêm thông tin style
         console.log('Popup confirmation displayed with styles:', {
@@ -2337,7 +2337,7 @@ class AdminDashboard {
             return;
         }
         
-        // Cập nhật icon theo loại thông báo
+            // Cập nhật icon theo loại thông báo
         if (notificationIcon) {
             notificationIcon.className = 'popup-icon ' + (type || 'success');
             
@@ -2357,32 +2357,32 @@ class AdminDashboard {
                     default: // success
                         iconElement.className = 'fas fa-check-circle';
                 }
+                }
             }
-        }
-        
-        // Cập nhật nội dung
-        notificationTitle.textContent = title || 'Thông báo';
-        notificationMessage.textContent = message || 'Thao tác đã hoàn tất.';
-        
-        // Xóa sự kiện click cũ
-        const newOkButton = okButton.cloneNode(true);
-        okButton.parentNode.replaceChild(newOkButton, okButton);
-        
-        // Thêm sự kiện click mới
-        newOkButton.addEventListener('click', () => {
+            
+            // Cập nhật nội dung
+            notificationTitle.textContent = title || 'Thông báo';
+            notificationMessage.textContent = message || 'Thao tác đã hoàn tất.';
+            
+            // Xóa sự kiện click cũ
+            const newOkButton = okButton.cloneNode(true);
+            okButton.parentNode.replaceChild(newOkButton, okButton);
+            
+            // Thêm sự kiện click mới
+            newOkButton.addEventListener('click', () => {
             console.log('OK button clicked');
-            this.hideNotification();
-            if (typeof callback === 'function') {
-                callback();
-            }
-        });
-        
+                this.hideNotification();
+                if (typeof callback === 'function') {
+                    callback();
+                }
+            });
+            
         // Áp dụng style trực tiếp để đảm bảo hiển thị
         notificationPopup.style.display = 'flex';
         notificationPopup.style.opacity = '1';
         notificationPopup.style.visibility = 'visible';
         notificationPopup.style.zIndex = '9999';
-        notificationPopup.classList.add('show');
+            notificationPopup.classList.add('show');
         
         console.log('Popup notification displayed with styles:', {
             display: window.getComputedStyle(notificationPopup).display,
@@ -2454,33 +2454,33 @@ class AdminDashboard {
         
         try {
             const response = await fetch(url, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
             
             console.log('Kết quả API xóa học sinh:', {
                 status: response.status,
                 statusText: response.statusText
-            });
-            
-            if (!response.ok) {
+        });
+
+        if (!response.ok) {
                 let errorMessage = `Lỗi xóa học sinh: ${response.status} ${response.statusText}`;
                 
                 try {
-                    const errorData = await response.json();
+            const errorData = await response.json();
                     console.error('Chi tiết lỗi từ API:', errorData);
                     errorMessage = errorData.message || errorMessage;
                 } catch (jsonError) {
                     console.error('Không thể đọc phản hồi lỗi dưới dạng JSON:', jsonError);
-                }
-                
+        }
+        
                 throw new Error(errorMessage);
             }
             
             console.log('Xóa học sinh thành công');
-            return true;
+        return true;
         } catch (error) {
             console.error('Lỗi trong deleteStudentRequest:', error);
             throw error;

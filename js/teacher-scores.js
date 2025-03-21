@@ -119,8 +119,11 @@ class TeacherScores {
             document.getElementById('gradeID').value = '';
             document.getElementById('scoreForm').reset();
             document.getElementById('gradeDate').valueAsDate = new Date();
-            modal.style.display = 'block';
             
+            // Tải danh sách học sinh từ tất cả các lớp
+            this.loadAllStudents();
+            
+            modal.style.display = 'block';
         }
     }
 
@@ -227,6 +230,33 @@ class TeacherScores {
 
     validateScore(score) {
         return score >= 0 && score <= 10;
+    }
+
+    // Thêm phương thức mới để tải tất cả học sinh
+    async loadAllStudents() {
+        try {
+            console.log('Đang tải danh sách tất cả học sinh...');
+            const studentsResponse = await fetch(`${this.apiBaseUrl}/GetTeacherAllTeachStudentsByCohort?id=${this.teacher.teacherId}`);
+            const students = await studentsResponse.json();
+            
+            console.log('Danh sách học sinh:', students);
+            
+            const studentSelect = document.getElementById('studentID');
+            if (studentSelect) {
+                studentSelect.innerHTML = `
+                    <option value="">Chọn học sinh</option>
+                    ${students.map(student => `
+                        <option value="${student.studentID}">
+                            ${student.studentName}
+                        </option>
+                    `).join('')}
+                `;
+            } else {
+                console.error('Không tìm thấy phần tử select học sinh');
+            }
+        } catch (error) {
+            console.error('Lỗi khi tải danh sách học sinh:', error);
+        }
     }
 }
 

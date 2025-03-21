@@ -16,10 +16,16 @@ class AdminDashboard {
             this.handleResponsiveLayout();
         });
 
+        // Đảm bảo các popup tồn tại trong DOM
+        this.ensurePopupsExist();
+
         // Khởi tạo xử lý popup
         this.setupPopupHandlers();
 
         this.setupModalCloseHandlers();
+        
+        // Thêm log khởi tạo để debug
+        console.log('AdminDashboard đã được khởi tạo');
     }
 
     initializeNavigation() {
@@ -193,15 +199,20 @@ class AdminDashboard {
         try {
             // Lấy tất cả học sinh
             const studentsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllStudents');
-            const studentsData = await studentsResponse.json();
+            const studentsData = await studentsResponse.json(); // Đã sửa từ response thành studentsResponse
             const students = studentsData.data || [];
 
             // Tính tỷ lệ nam/nữ
             const maleStudents = students.filter(s => s.gender === 'Male').length;
             const femaleStudents = students.filter(s => s.gender === 'Female').length;
-            const malePercent = Math.round((maleStudents / students.length) * 100);
-            const femalePercent = Math.round((femaleStudents / students.length) * 100);
-            document.getElementById('genderRatio').textContent = `${malePercent}% / ${femalePercent}%`;
+            const malePercent = Math.round((maleStudents / students.length) * 100) || 0;
+            const femalePercent = Math.round((femaleStudents / students.length) * 100) || 0;
+            
+            // Thêm kiểm tra phần tử tồn tại trước khi cập nhật
+            const genderRatioElement = document.getElementById('genderRatio');
+            if (genderRatioElement) {
+                genderRatioElement.textContent = `${malePercent}% / ${femalePercent}%`;
+            }
 
             // Lấy thông tin về lớp học
             const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts');
@@ -219,12 +230,24 @@ class AdminDashboard {
             }));
 
             // Tìm lớp đông nhất và ít nhất
-            const sortedCohorts = cohortStats.sort((a, b) => b.count - a.count);
-            const largest = sortedCohorts[0];
-            const smallest = sortedCohorts[sortedCohorts.length - 1];
+            if (cohortStats.length > 0) {
+                const sortedCohorts = cohortStats.sort((a, b) => b.count - a.count);
+                const largest = sortedCohorts[0];
+                const smallest = sortedCohorts[sortedCohorts.length - 1];
 
-            document.getElementById('largestClass').textContent = `${largest.name} (${largest.count} học sinh)`;
-            document.getElementById('smallestClass').textContent = `${smallest.name} (${smallest.count} học sinh)`;
+                const largestClassElement = document.getElementById('largestClass');
+                const smallestClassElement = document.getElementById('smallestClass');
+                
+                if (largestClassElement) {
+                    largestClassElement.textContent = `${largest.name} (${largest.count} học sinh)`;
+                }
+                
+                if (smallestClassElement) {
+                    smallestClassElement.textContent = `${smallest.name} (${smallest.count} học sinh)`;
+                }
+            } else {
+                console.warn('Không có dữ liệu lớp học hoặc danh sách rỗng');
+            }
 
         } catch (error) {
             console.error("Lỗi khi cập nhật thống kê nhanh:", error);
@@ -277,7 +300,7 @@ class AdminDashboard {
                 const cohort = cohorts.find(co => co.cohortId === student.cohortId);
                 const cohortName = cohort ? cohort.cohortName : 'N/A';
                 return`
-                <tr>
+                <tr data-id="${student.studentId}">
                 
                     <td>${student.firstName}</td>
                     <td>${student.lastName}</td>     
@@ -289,15 +312,28 @@ class AdminDashboard {
                     <td>${student.password}</td>
                     <td>${cohort ? cohortName: 'N/A'}</td>
                     <td>
-                        <button onclick="adminDashboard.openStudentModal('${student.studentId}')" class="btn-edit" data-id="${student.studentId}">
+                        <button class="btn-edit" data-id="${student.studentId}">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button onclick="adminDashboard.deleteStudent('${student.studentId}')" class="btn-delete" data-id="${student.studentId}">
+                        <button class="btn-delete" data-id="${student.studentId}" 
+                            onclick="console.log('Delete button clicked directly for ID: ${student.studentId}')">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
                 </tr>
             `}).join('');
+            
+            // Thêm event listeners trực tiếp cho các nút delete
+            const deleteButtons = tbody.querySelectorAll('.btn-delete');
+            deleteButtons.forEach(button => {
+                const studentId = button.dataset.id;
+                button.addEventListener('click', (e) => {
+                    console.log('Direct event: Delete button clicked for ID:', studentId);
+                    e.stopPropagation(); // Ngăn chặn event bubbling
+                });
+            });
+            
+            console.log('Total delete buttons added:', deleteButtons.length);
         } catch (error) {
             console.error("Error loading students:", error);
         }
@@ -308,16 +344,39 @@ class AdminDashboard {
         document.getElementById('addStudentBtn')?.addEventListener('click', () => {
             this.openStudentModal();
         });
-
-        document.getElementById('studentForm')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await this.saveStudent();
-        });
         
         // Add search functionality
         document.getElementById('searchStudent')?.addEventListener('input', (e) => {
             this.searchStudents(e.target.value);
         });
+        
+        // Xử lý sự kiện cho các nút trong bảng
+        const studentTable = document.querySelector('#studentTable');
+        if (studentTable) {
+            // Sử dụng event delegation cho các nút trong bảng
+            studentTable.addEventListener('click', (e) => {
+                // Xác định nút đã được nhấp
+                const target = e.target.closest('.btn-edit, .btn-delete');
+                if (!target) return; // Không phải click vào nút
+                
+                // Lấy ID học sinh từ thuộc tính data-id hoặc từ phần tử cha
+                const studentId = target.dataset.id || target.closest('tr').dataset.id;
+                if (!studentId) return; // Không tìm thấy ID
+                
+                // Xử lý tương ứng với loại nút
+                if (target.classList.contains('btn-edit')) {
+                    console.log('Edit student:', studentId);
+                    this.openStudentModal(studentId);
+                } else if (target.classList.contains('btn-delete')) {
+                    console.log('Delete student:', studentId);
+                    this.deleteStudent(studentId);
+                }
+                
+                // Ngăn sự kiện lan ra
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        }
     }
 
     searchStudents(query) {
@@ -522,21 +581,31 @@ class AdminDashboard {
     
     
     async deleteStudent(studentId) {
+        console.log('deleteStudent called for ID:', studentId);
+        
         try {
-            this.showConfirmation(
+            // Sử dụng phương thức hiển thị popup mạnh hơn
+            this.forceShowConfirmation(
                 'Xác nhận xóa học sinh',
                 'Bạn có chắc chắn muốn xóa học sinh này không? Dữ liệu không thể khôi phục sau khi xóa.',
                 async () => {
+                    console.log('Xác nhận xóa học sinh với ID:', studentId);
                     try {
+                        console.log('Bắt đầu gọi API xóa học sinh');
                         await this.deleteStudentRequest(studentId);
+                        console.log('API xóa học sinh thành công');
+                        
+                        // Cập nhật danh sách học sinh
                         await this.loadStudents();
+                        
+                        // Hiển thị thông báo thành công
                         this.showNotification(
                             'success',
                             'Xóa học sinh thành công',
                             'Học sinh đã được xóa khỏi hệ thống.'
                         );
                     } catch (error) {
-                        console.error('Error deleting student:', error);
+                        console.error('Lỗi chi tiết khi xóa học sinh:', error);
                         this.showNotification(
                             'error',
                             'Lỗi xóa học sinh',
@@ -545,8 +614,25 @@ class AdminDashboard {
                     }
                 }
             );
+            
+            // Kiểm tra trạng thái popup sau khi hiển thị
+            setTimeout(() => {
+                this.checkPopupStatus();
+            }, 100);
+            
         } catch (error) {
-            console.error('Error in deleteStudent:', error);
+            console.error('Lỗi trong phương thức deleteStudent:', error);
+            // Sử dụng xác nhận thông thường nếu có lỗi với popup
+            if (window.confirm('Bạn có chắc chắn muốn xóa học sinh này không? Dữ liệu không thể khôi phục sau khi xóa.')) {
+                try {
+                    await this.deleteStudentRequest(studentId);
+                    await this.loadStudents();
+                    alert('Xóa học sinh thành công!');
+                } catch (error) {
+                    console.error('Lỗi khi xóa học sinh (fallback):', error);
+                    alert('Lỗi xóa học sinh. Vui lòng thử lại sau.');
+                }
+            }
         }
     }
 
@@ -575,9 +661,7 @@ class AdminDashboard {
     
             const tbody = document.querySelector('#teacherTable tbody');
             tbody.innerHTML = teachers.map(teacher => `
-                <tr>
-                
-                    
+                <tr data-id="${teacher.teacherId}">
                     <td>${teacher.lastName}</td>
                     <td>${teacher.firstName}</td>
                     <td>${teacher.email}</td>
@@ -588,10 +672,10 @@ class AdminDashboard {
                     <td>${teacher.password}</td>
                    
                     <td>
-                        <button onclick="adminDashboard.openTeacherModal('${teacher.teacherId}')" class="btn-edit" data-id="${teacher.teacherId}">
+                        <button class="btn-edit" data-id="${teacher.teacherId}">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button onclick="adminDashboard.deleteTeacher('${teacher.teacherId}')" class="btn-delete" data-id="${teacher.teacherId}">
+                        <button class="btn-delete" data-id="${teacher.teacherId}">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
@@ -607,16 +691,39 @@ class AdminDashboard {
         document.getElementById('addTeacherBtn')?.addEventListener('click', () => {
             this.openTeacherModal();
         });
-
-        document.getElementById('teacherForm')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await this.saveTeacher();
-        });
         
         // Add search functionality
         document.getElementById('searchTeacher')?.addEventListener('input', (e) => {
             this.searchTeachers(e.target.value);
         });
+        
+        // Xử lý sự kiện cho các nút trong bảng
+        const teacherTable = document.querySelector('#teacherTable');
+        if (teacherTable) {
+            // Sử dụng event delegation cho các nút trong bảng
+            teacherTable.addEventListener('click', (e) => {
+                // Xác định nút đã được nhấp
+                const target = e.target.closest('.btn-edit, .btn-delete');
+                if (!target) return; // Không phải click vào nút
+                
+                // Lấy ID giáo viên từ thuộc tính data-id hoặc từ phần tử cha
+                const teacherId = target.dataset.id || target.closest('tr').dataset.id;
+                if (!teacherId) return; // Không tìm thấy ID
+                
+                // Xử lý tương ứng với loại nút
+                if (target.classList.contains('btn-edit')) {
+                    console.log('Edit teacher:', teacherId);
+                    this.openTeacherModal(teacherId);
+                } else if (target.classList.contains('btn-delete')) {
+                    console.log('Delete teacher:', teacherId);
+                    this.deleteTeacher(teacherId);
+                }
+                
+                // Ngăn sự kiện lan ra
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        }
     }
 
     searchTeachers(query) {
@@ -876,20 +983,20 @@ class AdminDashboard {
             const tbody = document.querySelector('#cohortTable tbody');
             tbody.innerHTML = cohorts.map((co, index) => {
                 return `
-                    <tr>
+                    <tr data-id="${co.cohortId}">
                         <td>${co.cohortName}</td>
                         <td>${co.description}</td>
                         <td>${studentCounts[index]}</td>
                         <td>
-                            <button onclick="adminDashboard.openCohortModal('${co.cohortId}')" class="btn-edit">
+                            <button class="btn-edit" data-id="${co.cohortId}">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button onclick="adminDashboard.deleteCohort('${co.cohortId}')" class="btn-delete">
+                            <button class="btn-delete" data-id="${co.cohortId}">
                                 <i class="fas fa-trash"></i>
                             </button>
-                             <button onclick="adminDashboard.printStudentInfo('${co.cohortId}')" class="btn-print">
-                            <i class="fas fa-print"></i> Print
-                        </button>
+                            <button class="btn-print" data-id="${co.cohortId}">
+                                <i class="fas fa-print"></i> Print
+                            </button>
                         </td>
                     </tr>
                 `;
@@ -979,16 +1086,42 @@ class AdminDashboard {
         document.getElementById('addCohortBtn')?.addEventListener('click', () => {
             this.openCohortModal();
         });
-
-        document.getElementById('cohortForm')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await this.saveCohort();
-        });
         
         // Add search functionality
         document.getElementById('searchCohort')?.addEventListener('input', (e) => {
             this.searchCohorts(e.target.value);
         });
+        
+        // Xử lý sự kiện cho các nút trong bảng
+        const cohortTable = document.querySelector('#cohortTable');
+        if (cohortTable) {
+            // Sử dụng event delegation cho các nút trong bảng
+            cohortTable.addEventListener('click', (e) => {
+                // Xác định nút đã được nhấp
+                const target = e.target.closest('.btn-edit, .btn-delete, .btn-print');
+                if (!target) return; // Không phải click vào nút
+                
+                // Lấy ID lớp học từ thuộc tính data-id hoặc từ phần tử cha
+                const cohortId = target.dataset.id || target.closest('tr').dataset.id;
+                if (!cohortId) return; // Không tìm thấy ID
+                
+                // Xử lý tương ứng với loại nút
+                if (target.classList.contains('btn-edit')) {
+                    console.log('Edit cohort:', cohortId);
+                    this.openCohortModal(cohortId);
+                } else if (target.classList.contains('btn-delete')) {
+                    console.log('Delete cohort:', cohortId);
+                    this.deleteCohort(cohortId);
+                } else if (target.classList.contains('btn-print')) {
+                    console.log('Print cohort:', cohortId);
+                    this.printStudentInfo(cohortId);
+                }
+                
+                // Ngăn sự kiện lan ra
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        }
     }
 
     searchCohorts(query) {
@@ -1243,13 +1376,13 @@ class AdminDashboard {
             }
             
             tbody.innerHTML = subjects.map(subject => `
-                <tr>
+                <tr data-id="${subject.subjectId}">
                     <td>${subject.subjectName}</td>
                     <td>
-                        <button onclick="adminDashboard.openSubjectModal('${subject.subjectId}')" class="btn-edit" data-id="${subject.subjectId}">
+                        <button class="btn-edit" data-id="${subject.subjectId}">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button onclick="adminDashboard.deleteSubject('${subject.subjectId}')" class="btn-delete" data-id="${subject.subjectId}">
+                        <button class="btn-delete" data-id="${subject.subjectId}">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
@@ -1269,16 +1402,33 @@ class AdminDashboard {
         document.getElementById('addSubjectBtn')?.addEventListener('click', () => {
             this.openSubjectModal();
         });
-
-        document.getElementById('subjectForm')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await this.saveSubject();
-        });
-
     
         document.getElementById('searchSubject')?.addEventListener('input', (e) => {
             this.searchSubjects(e.target.value);
         });
+
+        // Xử lý sự kiện cho các nút trong bảng môn học
+        const subjectTable = document.querySelector('#subjectTable');
+        if (subjectTable) {
+            subjectTable.addEventListener('click', (e) => {
+                const target = e.target.closest('.btn-edit, .btn-delete');
+                if (!target) return;
+                
+                const subjectId = target.dataset.id || target.closest('tr').dataset.id;
+                if (!subjectId) return;
+                
+                if (target.classList.contains('btn-edit')) {
+                    console.log('Edit subject:', subjectId);
+                    this.openSubjectModal(subjectId);
+                } else if (target.classList.contains('btn-delete')) {
+                    console.log('Delete subject:', subjectId);
+                    this.deleteSubject(subjectId);
+                }
+                
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        }
     }
 
     openSubjectModal(subjectId = null) {
@@ -1490,7 +1640,7 @@ class AdminDashboard {
                 const cohort = cohorts.find(c => c.cohortId === assignment.cohortId);
 
                 return `
-                    <tr>
+                    <tr data-id="${assignment.lessonClassId}">
                         <td>${teacher ? `${teacher.firstName} ${teacher.lastName}` : 'N/A'}</td>
                         <td>${subject ? subject.subjectName : 'N/A'}</td>
                         <td>${cohort ? cohort.cohortName : 'N/A'}</td>
@@ -1500,10 +1650,10 @@ class AdminDashboard {
                         <td>${assignment.endTime  || 'N/A'}</td>
                         <td>${assignment.dayOfWeek|| 'N/A'}</td>
                         <td>
-                            <button onclick="adminDashboard.openAssignmentModal('${assignment.lessonClassId}')" class="btn-edit">
+                            <button class="btn-edit" data-id="${assignment.lessonClassId}">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button onclick="adminDashboard.deleteAssignment('${assignment.lessonClassId}')" class="btn-delete">
+                            <button class="btn-delete" data-id="${assignment.lessonClassId}">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
@@ -1565,15 +1715,33 @@ class AdminDashboard {
             this.openAssignmentModal();
         });
 
-        document.getElementById('assignmentForm')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await this.saveAssignment();
-        });
-
         // Thêm tìm kiếm
         document.getElementById('searchAssignment')?.addEventListener('input', (e) => {
             this.searchAssignments(e.target.value);
         });
+
+        // Xử lý sự kiện cho các nút trong bảng phân công
+        const assignmentTable = document.querySelector('#assignmentTable');
+        if (assignmentTable) {
+            assignmentTable.addEventListener('click', (e) => {
+                const target = e.target.closest('.btn-edit, .btn-delete');
+                if (!target) return;
+                
+                const lessonClassId = target.dataset.id || target.closest('tr').dataset.id;
+                if (!lessonClassId) return;
+                
+                if (target.classList.contains('btn-edit')) {
+                    console.log('Edit assignment:', lessonClassId);
+                    this.openAssignmentModal(lessonClassId);
+                } else if (target.classList.contains('btn-delete')) {
+                    console.log('Delete assignment:', lessonClassId);
+                    this.deleteAssignment(lessonClassId);
+                }
+                
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        }
     }
 
     async openAssignmentModal(lessonClassId) {
@@ -1686,22 +1854,37 @@ class AdminDashboard {
     }
 
     async deleteAssignment(lessonClassId) {
-        if (!confirm('Bạn có chắc chắn muốn xóa phân công này?')) return;
-
         try {
-            const response = await fetch(`https://localhost:7231/RealAdmins/DeleteAssignedTeacher?lessonClassID=${lessonClassId}`, {
-                method: 'DELETE'
-            });
+            this.showConfirmation(
+                'Xác nhận xóa phân công',
+                'Bạn có chắc chắn muốn xóa phân công này không? Dữ liệu không thể khôi phục sau khi xóa.',
+                async () => {
+                    try {
+                        const response = await fetch(`https://localhost:7231/RealAdmins/DeleteAssignedTeacher?lessonClassID=${lessonClassId}`, {
+                            method: 'DELETE'
+                        });
 
-            if (!response.ok) throw new Error('Failed to delete assignment');
+                        if (!response.ok) throw new Error('Failed to delete assignment');
 
-            await this.loadAssignments();
+                        await this.loadAssignments();
+                        this.showNotification(
+                            'success',
+                            'Xóa phân công thành công',
+                            'Phân công đã được xóa khỏi hệ thống.'
+                        );
+                    } catch (error) {
+                        console.error("Lỗi khi xóa phân công:", error);
+                        this.showNotification(
+                            'error',
+                            'Lỗi xóa phân công',
+                            'Đã xảy ra lỗi khi xóa phân công. Vui lòng thử lại sau.'
+                        );
+                    }
+                }
+            );
         } catch (error) {
-            console.error("Lỗi khi xóa phân công:", error);
-            alert("Không thể xóa phân công. Vui lòng thử lại.");
+            console.error('Error in deleteAssignment:', error);
         }
-        
-        return true;
     }
 
     searchAssignments(query) {
@@ -1808,12 +1991,7 @@ class AdminDashboard {
         // Add event listeners to close buttons
         const closeButtons = modal.querySelectorAll('.modal-close');
         closeButtons.forEach(button => {
-            // Remove any existing event listeners to prevent duplicates
-            const newButton = button.cloneNode(true);
-            button.parentNode.replaceChild(newButton, button);
-            
-            // Add new event listener
-            newButton.addEventListener('click', () => {
+            button.addEventListener('click', () => {
                 this.closeModal(modalId);
             });
         });
@@ -1823,6 +2001,83 @@ class AdminDashboard {
             if (e.target === modal) {
                 this.closeModal(modalId);
             }
+        });
+        
+        // Đảm bảo form action được kết nối đúng
+        const form = modal.querySelector('form');
+        if (form) {
+            // Xóa bỏ tất cả event listeners cũ
+            const newForm = form.cloneNode(true);
+            form.parentNode.replaceChild(newForm, form);
+            
+            // Gắn event listener mới
+            switch(modalId) {
+                case 'studentModal':
+                    newForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.saveStudent();
+                    });
+                    break;
+                case 'teacherModal':
+                    newForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.saveTeacher();
+                    });
+                    break;
+                case 'cohortModal':
+                    newForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.saveCohort();
+                    });
+                    break;
+                case 'subjectModal':
+                    newForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.saveSubject();
+                    });
+                    break;
+                case 'assignmentModal':
+                    newForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        this.saveAssignment();
+                    });
+                    break;
+            }
+            
+            // Đảm bảo submit được gọi khi nhấn nút có type="submit"
+            const submitButtons = newForm.querySelectorAll('button[type="submit"], input[type="submit"]');
+            submitButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    newForm.dispatchEvent(new Event('submit'));
+                });
+            });
+        }
+        
+        // Đảm bảo nút lưu được kết nối đúng (các nút không có type="submit")
+        const saveButtons = modal.querySelectorAll('.btn-save:not([type="submit"])');
+        saveButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                switch(modalId) {
+                    case 'studentModal':
+                        this.saveStudent();
+                        break;
+                    case 'teacherModal':
+                        this.saveTeacher();
+                        break;
+                    case 'cohortModal':
+                        this.saveCohort();
+                        break;
+                    case 'subjectModal':
+                        this.saveSubject();
+                        break;
+                    case 'assignmentModal':
+                        this.saveAssignment();
+                        break;
+                }
+            });
         });
     }
 
@@ -1936,6 +2191,24 @@ class AdminDashboard {
             }
         });
     }
+
+    // Thêm phương thức deleteTeacherRequest
+    async deleteTeacherRequest(teacherId) {
+        const response = await fetch(`https://localhost:7231/RealAdmins/DeleteTeacher?id=${teacherId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `Lỗi xóa giáo viên: ${response.status}`);
+        }
+        
+        return true;
+    }
+
     /**
      * Hiển thị popup xác nhận với callback
      * @param {string} title - Tiêu đề popup
@@ -1943,40 +2216,95 @@ class AdminDashboard {
      * @param {Function} onConfirm - Hàm callback khi người dùng xác nhận
      */
     showConfirmation(title, message, onConfirm) {
+        console.log('showConfirmation called:', title, message);
+        
+        // Đảm bảo popup hiển thị đúng
+        this.ensurePopupsExist();
+        
+        const confirmationPopup = document.getElementById('confirmationPopup');
         const confirmTitle = document.getElementById('confirmTitle');
         const confirmMessage = document.getElementById('confirmMessage');
         const confirmButton = document.getElementById('confirmButton');
-        const confirmationPopup = document.getElementById('confirmationPopup');
+        const cancelButton = document.getElementById('cancelButton');
         
-        if (confirmTitle && confirmMessage && confirmButton && confirmationPopup) {
-            // Cập nhật nội dung
-            confirmTitle.textContent = title || 'Xác nhận thao tác';
-            confirmMessage.textContent = message || 'Bạn có chắc chắn muốn thực hiện thao tác này?';
+        // Kiểm tra xem các phần tử có tồn tại
+        if (!confirmationPopup || !confirmTitle || !confirmMessage || !confirmButton) {
+            console.error('Không tìm thấy các phần tử popup xác nhận:', { 
+                confirmationPopup, confirmTitle, confirmMessage, confirmButton 
+            });
             
-            // Xóa sự kiện click cũ
-            const newConfirmButton = confirmButton.cloneNode(true);
-            confirmButton.parentNode.replaceChild(newConfirmButton, confirmButton);
-            
-            // Thêm sự kiện click mới
-            newConfirmButton.addEventListener('click', () => {
-                this.hideConfirmation();
+            // Nếu không tìm thấy popup, dùng confirm thông thường
+            if (window.confirm(message)) {
                 if (typeof onConfirm === 'function') {
                     onConfirm();
                 }
-            });
-            
-            // Hiển thị popup
-            confirmationPopup.classList.add('show');
+            }
+            return;
         }
+        
+        // Cập nhật nội dung
+        confirmTitle.textContent = title || 'Xác nhận thao tác';
+        confirmMessage.textContent = message || 'Bạn có chắc chắn muốn thực hiện thao tác này?';
+        
+        // Xóa sự kiện click cũ
+        const newConfirmButton = confirmButton.cloneNode(true);
+        confirmButton.parentNode.replaceChild(newConfirmButton, confirmButton);
+        
+        // Thêm sự kiện click mới
+        newConfirmButton.addEventListener('click', () => {
+            console.log('Confirm button clicked');
+            this.hideConfirmation();
+            if (typeof onConfirm === 'function') {
+                onConfirm();
+            }
+        });
+        
+        // Xử lý sự kiện hủy
+        if (cancelButton) {
+            const newCancelButton = cancelButton.cloneNode(true);
+            cancelButton.parentNode.replaceChild(newCancelButton, cancelButton);
+            
+            newCancelButton.addEventListener('click', () => {
+                console.log('Cancel button clicked');
+                this.hideConfirmation();
+            });
+        }
+        
+        // Áp dụng style trực tiếp để đảm bảo hiển thị
+        confirmationPopup.style.display = 'flex';
+        confirmationPopup.style.opacity = '1';
+        confirmationPopup.style.visibility = 'visible';
+        confirmationPopup.style.zIndex = '9999';
+        confirmationPopup.classList.add('show');
+        
+        // Debug thêm thông tin style
+        console.log('Popup confirmation displayed with styles:', {
+            display: window.getComputedStyle(confirmationPopup).display,
+            opacity: window.getComputedStyle(confirmationPopup).opacity,
+            visibility: window.getComputedStyle(confirmationPopup).visibility,
+            zIndex: window.getComputedStyle(confirmationPopup).zIndex
+        });
     }
 
     /**
      * Ẩn popup xác nhận
      */
     hideConfirmation() {
+        console.log('hideConfirmation called');
         const confirmationPopup = document.getElementById('confirmationPopup');
         if (confirmationPopup) {
+            // Xóa bỏ class và inline styles
             confirmationPopup.classList.remove('show');
+            confirmationPopup.style.opacity = '0';
+            confirmationPopup.style.visibility = 'hidden';
+            
+            // Đợi animation hoàn tất trước khi ẩn hoàn toàn
+            setTimeout(() => {
+                confirmationPopup.style.display = 'none';
+            }, 300);
+            console.log('Popup confirmation hidden');
+        } else {
+            console.error('Không tìm thấy phần tử confirmationPopup');
         }
     }
 
@@ -1988,14 +2316,29 @@ class AdminDashboard {
      * @param {Function} callback - Hàm callback khi đóng thông báo (optional)
      */
     showNotification(type, title, message, callback) {
+        console.log('showNotification called:', type, title, message);
+        
+        // Đảm bảo popup tồn tại
+        this.ensurePopupsExist();
+        
+        const notificationPopup = document.getElementById('notificationPopup');
         const notificationIcon = document.getElementById('notificationIcon');
         const notificationTitle = document.getElementById('notificationTitle');
         const notificationMessage = document.getElementById('notificationMessage');
         const okButton = document.getElementById('okButton');
-        const notificationPopup = document.getElementById('notificationPopup');
         
-        if (notificationIcon && notificationTitle && notificationMessage && okButton && notificationPopup) {
-            // Cập nhật icon theo loại thông báo
+        if (!notificationPopup || !notificationTitle || !notificationMessage || !okButton) {
+            console.error('Không tìm thấy các phần tử popup thông báo');
+            // Fallback to alert if popup elements don't exist
+            alert(`${title}: ${message}`);
+            if (typeof callback === 'function') {
+                callback();
+            }
+            return;
+        }
+        
+        // Cập nhật icon theo loại thông báo
+        if (notificationIcon) {
             notificationIcon.className = 'popup-icon ' + (type || 'success');
             
             // Cập nhật icon
@@ -2015,35 +2358,59 @@ class AdminDashboard {
                         iconElement.className = 'fas fa-check-circle';
                 }
             }
-            
-            // Cập nhật nội dung
-            notificationTitle.textContent = title || 'Thông báo';
-            notificationMessage.textContent = message || 'Thao tác đã hoàn tất.';
-            
-            // Xóa sự kiện click cũ
-            const newOkButton = okButton.cloneNode(true);
-            okButton.parentNode.replaceChild(newOkButton, okButton);
-            
-            // Thêm sự kiện click mới
-            newOkButton.addEventListener('click', () => {
-                this.hideNotification();
-                if (typeof callback === 'function') {
-                    callback();
-                }
-            });
-            
-            // Hiển thị popup
-            notificationPopup.classList.add('show');
         }
+        
+        // Cập nhật nội dung
+        notificationTitle.textContent = title || 'Thông báo';
+        notificationMessage.textContent = message || 'Thao tác đã hoàn tất.';
+        
+        // Xóa sự kiện click cũ
+        const newOkButton = okButton.cloneNode(true);
+        okButton.parentNode.replaceChild(newOkButton, okButton);
+        
+        // Thêm sự kiện click mới
+        newOkButton.addEventListener('click', () => {
+            console.log('OK button clicked');
+            this.hideNotification();
+            if (typeof callback === 'function') {
+                callback();
+            }
+        });
+        
+        // Áp dụng style trực tiếp để đảm bảo hiển thị
+        notificationPopup.style.display = 'flex';
+        notificationPopup.style.opacity = '1';
+        notificationPopup.style.visibility = 'visible';
+        notificationPopup.style.zIndex = '9999';
+        notificationPopup.classList.add('show');
+        
+        console.log('Popup notification displayed with styles:', {
+            display: window.getComputedStyle(notificationPopup).display,
+            opacity: window.getComputedStyle(notificationPopup).opacity,
+            visibility: window.getComputedStyle(notificationPopup).visibility,
+            zIndex: window.getComputedStyle(notificationPopup).zIndex
+        });
     }
 
     /**
      * Ẩn popup thông báo
      */
     hideNotification() {
+        console.log('hideNotification called');
         const notificationPopup = document.getElementById('notificationPopup');
         if (notificationPopup) {
+            // Xóa bỏ class và inline styles
             notificationPopup.classList.remove('show');
+            notificationPopup.style.opacity = '0';
+            notificationPopup.style.visibility = 'hidden';
+            
+            // Đợi animation hoàn tất trước khi ẩn hoàn toàn
+            setTimeout(() => {
+                notificationPopup.style.display = 'none';
+            }, 300);
+            console.log('Popup notification hidden');
+        } else {
+            console.error('Không tìm thấy phần tử notificationPopup');
         }
     }
 
@@ -2081,19 +2448,43 @@ class AdminDashboard {
 
     // Thêm phương thức deleteStudentRequest 
     async deleteStudentRequest(studentId) {
-        const response = await fetch(`https://localhost:7231/RealAdmins/DeleteStudent?id=${studentId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || `Lỗi xóa học sinh: ${response.status}`);
-        }
+        console.log('Bắt đầu xóa học sinh với ID:', studentId);
+        const url = `https://localhost:7231/RealAdmins/DeleteStudent?id=${studentId}`;
+        console.log('URL API xóa học sinh:', url);
         
-        return true;
+        try {
+            const response = await fetch(url, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            console.log('Kết quả API xóa học sinh:', {
+                status: response.status,
+                statusText: response.statusText
+            });
+            
+            if (!response.ok) {
+                let errorMessage = `Lỗi xóa học sinh: ${response.status} ${response.statusText}`;
+                
+                try {
+                    const errorData = await response.json();
+                    console.error('Chi tiết lỗi từ API:', errorData);
+                    errorMessage = errorData.message || errorMessage;
+                } catch (jsonError) {
+                    console.error('Không thể đọc phản hồi lỗi dưới dạng JSON:', jsonError);
+                }
+                
+                throw new Error(errorMessage);
+            }
+            
+            console.log('Xóa học sinh thành công');
+            return true;
+        } catch (error) {
+            console.error('Lỗi trong deleteStudentRequest:', error);
+            throw error;
+        }
     }
 
     // Thêm phương thức saveTeacherRequest
@@ -2127,7 +2518,7 @@ class AdminDashboard {
         return response.json();
     }
 
-    // Thêm phương thức deleteTeacherRequest
+    // Giữ lại phương thức này và xóa bỏ phương thức trùng lặp sau đó
     async deleteTeacherRequest(teacherId) {
         const response = await fetch(`https://localhost:7231/RealAdmins/DeleteTeacher?id=${teacherId}`, {
             method: 'DELETE',
@@ -2142,6 +2533,286 @@ class AdminDashboard {
         }
         
         return true;
+    }
+
+    // Kiểm tra và thêm các popup nếu chưa tồn tại
+    ensurePopupsExist() {
+        console.log('Checking if popups exist...');
+        
+        // Kiểm tra popup xác nhận
+        if (!document.getElementById('confirmationPopup')) {
+            console.log('Adding confirmation popup to the DOM');
+            const confirmationHTML = `
+                <div id="confirmationPopup" class="popup-overlay">
+                    <div class="popup-content">
+                        <div class="popup-header">
+                            <h3 id="confirmTitle">Xác nhận thao tác</h3>
+                            <button class="popup-close">&times;</button>
+                        </div>
+                        <div class="popup-body">
+                            <p id="confirmMessage">Bạn có chắc chắn muốn thực hiện thao tác này?</p>
+                        </div>
+                        <div class="popup-footer">
+                            <button id="confirmButton" class="btn-confirm">Xác nhận</button>
+                            <button id="cancelButton" class="btn-cancel">Hủy bỏ</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', confirmationHTML);
+            
+            // Thêm style cho popup với !important để đảm bảo không bị ghi đè
+            if (!document.getElementById('popupStyles')) {
+                const popupStyles = `
+                    <style id="popupStyles">
+                        .popup-overlay {
+                            display: none;
+                            position: fixed !important;
+                            top: 0 !important;
+                            left: 0 !important;
+                            width: 100% !important;
+                            height: 100% !important;
+                            background-color: rgba(0, 0, 0, 0.7) !important;
+                            z-index: 99999 !important;
+                            justify-content: center !important;
+                            align-items: center !important;
+                            opacity: 0;
+                            transition: opacity 0.3s ease;
+                        }
+                        .popup-overlay.show {
+                            opacity: 1 !important;
+                            display: flex !important;
+                            visibility: visible !important;
+                        }
+                        .popup-content {
+                            background-color: white !important;
+                            border-radius: 5px !important;
+                            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+                            width: 400px !important;
+                            max-width: 90% !important;
+                            margin: auto !important;
+                            animation: popIn 0.3s ease !important;
+                            position: relative !important;
+                            z-index: 100000 !important;
+                        }
+                        @keyframes popIn {
+                            0% { transform: scale(0.5); opacity: 0; }
+                            100% { transform: scale(1); opacity: 1; }
+                        }
+                        .popup-header {
+                            display: flex !important;
+                            justify-content: space-between !important;
+                            align-items: center !important;
+                            padding: 15px 20px !important;
+                            border-bottom: 1px solid #eee !important;
+                            background-color: #f8f9fa !important;
+                            border-radius: 5px 5px 0 0 !important;
+                        }
+                        .popup-body {
+                            padding: 20px !important;
+                        }
+                        .popup-footer {
+                            padding: 15px 20px !important;
+                            border-top: 1px solid #eee !important;
+                            display: flex !important;
+                            justify-content: flex-end !important;
+                            gap: 10px !important;
+                            background-color: #f8f9fa !important;
+                            border-radius: 0 0 5px 5px !important;
+                        }
+                        .btn-confirm {
+                            background-color: #4B91F1 !important;
+                            color: white !important;
+                            border: none !important;
+                            padding: 8px 15px !important;
+                            border-radius: 4px !important;
+                            cursor: pointer !important;
+                            font-weight: bold !important;
+                        }
+                        .btn-confirm:hover {
+                            background-color: #3a7bd5 !important;
+                        }
+                        .btn-cancel {
+                            background-color: #6c757d !important;
+                            color: white !important;
+                            border: none !important;
+                            padding: 8px 15px !important;
+                            border-radius: 4px !important;
+                            cursor: pointer !important;
+                        }
+                        .btn-cancel:hover {
+                            background-color: #5a6268 !important;
+                        }
+                        .popup-close {
+                            background: none !important;
+                            border: none !important;
+                            font-size: 24px !important;
+                            cursor: pointer !important;
+                            padding: 0 !important;
+                            margin: 0 !important;
+                            line-height: 1 !important;
+                        }
+                        
+                        /* Thêm style cho icon */
+                        .popup-icon {
+                            display: flex !important;
+                            justify-content: center !important;
+                            margin-bottom: 15px !important;
+                            font-size: 32px !important;
+                        }
+                        .popup-icon.success i { color: #28a745 !important; }
+                        .popup-icon.error i { color: #dc3545 !important; }
+                        .popup-icon.warning i { color: #ffc107 !important; }
+                        .popup-icon.info i { color: #17a2b8 !important; }
+                    </style>
+                `;
+                document.head.insertAdjacentHTML('beforeend', popupStyles);
+            }
+            
+            // Thêm sự kiện cho nút đóng popup
+            const closeBtn = document.querySelector('#confirmationPopup .popup-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    this.hideConfirmation();
+                });
+            }
+        }
+        
+        // Kiểm tra popup thông báo
+        if (!document.getElementById('notificationPopup')) {
+            console.log('Adding notification popup to the DOM');
+            const notificationHTML = `
+                <div id="notificationPopup" class="popup-overlay">
+                    <div class="popup-content">
+                        <div class="popup-header">
+                            <h3 id="notificationTitle">Thông báo</h3>
+                            <button class="popup-close">&times;</button>
+                        </div>
+                        <div class="popup-body">
+                            <div class="popup-icon success" id="notificationIcon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <p id="notificationMessage">Thao tác đã hoàn tất.</p>
+                        </div>
+                        <div class="popup-footer">
+                            <button id="okButton" class="btn-confirm">OK</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', notificationHTML);
+            
+            // Thêm sự kiện cho nút đóng popup
+            const closeBtn = document.querySelector('#notificationPopup .popup-close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    this.hideNotification();
+                });
+            }
+        }
+        
+        console.log('Popup check completed');
+    }
+
+    // Thêm phương thức kiểm tra trạng thái popup
+    checkPopupStatus() {
+        console.log('Checking popup status...');
+        
+        const confirmationPopup = document.getElementById('confirmationPopup');
+        const notificationPopup = document.getElementById('notificationPopup');
+        
+        if (confirmationPopup) {
+            const style = window.getComputedStyle(confirmationPopup);
+            console.log('Confirmation popup status:', {
+                exists: true,
+                display: style.display,
+                opacity: style.opacity,
+                visibility: style.visibility,
+                zIndex: style.zIndex,
+                hasClassShow: confirmationPopup.classList.contains('show')
+            });
+        } else {
+            console.log('Confirmation popup does not exist');
+        }
+        
+        if (notificationPopup) {
+            const style = window.getComputedStyle(notificationPopup);
+            console.log('Notification popup status:', {
+                exists: true,
+                display: style.display,
+                opacity: style.opacity,
+                visibility: style.visibility,
+                zIndex: style.zIndex,
+                hasClassShow: notificationPopup.classList.contains('show')
+            });
+        } else {
+            console.log('Notification popup does not exist');
+        }
+    }
+    
+    // Phương thức hiển thị popup trực tiếp không thông qua animation
+    forceShowConfirmation(title, message, onConfirm) {
+        console.log('forceShowConfirmation called');
+        
+        // Đảm bảo popup tồn tại
+        this.ensurePopupsExist();
+        
+        // Lấy tham chiếu đến các phần tử popup
+        const popup = document.getElementById('confirmationPopup');
+        const titleEl = document.getElementById('confirmTitle');
+        const messageEl = document.getElementById('confirmMessage');
+        const confirmBtn = document.getElementById('confirmButton');
+        const cancelBtn = document.getElementById('cancelButton');
+        
+        if (!popup || !titleEl || !messageEl || !confirmBtn || !cancelBtn) {
+            console.error('Popup elements not found, falling back to confirm');
+            if (window.confirm(message)) {
+                onConfirm();
+            }
+            return;
+        }
+        
+        // Cập nhật nội dung
+        titleEl.textContent = title;
+        messageEl.textContent = message;
+        
+        // Tạo các phần tử mới để gắn sự kiện
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+        
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+        
+        // Gắn sự kiện
+        newConfirmBtn.onclick = () => {
+            console.log('Confirm button clicked (forced)');
+            this.hideConfirmation();
+            onConfirm();
+        };
+        
+        newCancelBtn.onclick = () => {
+            console.log('Cancel button clicked (forced)');
+            this.hideConfirmation();
+        };
+        
+        // Hiển thị popup với style inline trực tiếp
+        popup.style.cssText = `
+            display: flex !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            z-index: 99999 !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background-color: rgba(0, 0, 0, 0.7) !important;
+        `;
+        
+        // Log thông tin
+        setTimeout(() => {
+            this.checkPopupStatus();
+        }, 50);
     }
 }
 

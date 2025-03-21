@@ -1,6 +1,5 @@
 /* CSS Tổng hợp cho Trang Giáo Viên */
 
-/* Reset và Styles Chung */
 * {
     margin: 0;
     padding: 0;
@@ -1123,22 +1122,60 @@ tbody tr:hover {
     .sidebar {
         width: 100%;
         padding: 1rem 0;
+        position: fixed;
+        left: -100%;
+        top: 64px; /* Height of the header */
+        height: calc(100vh - 64px);
+        z-index: 1000;
+        transition: left 0.3s ease;
+    }
+    
+    .sidebar.active {
+        left: 0;
+    }
+    
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 64px;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 64px);
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+    }
+    
+    .sidebar-overlay.active {
+        display: block;
+    }
+    
+    .menu-toggle {
+        display: block;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        margin-right: 1rem;
+    }
+    
+    .header-left {
+        display: flex;
+        align-items: center;
     }
     
     .sidebar ul {
-        display: flex;
-        overflow-x: auto;
         padding: 0 1rem;
     }
     
     .sidebar li {
-        margin-bottom: 0;
-        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
     }
     
     .sidebar a {
-        padding: 0.5rem 1rem;
-        white-space: nowrap;
+        padding: 0.75rem 1rem;
+        display: flex;
+        align-items: center;
     }
     
     .header {
@@ -1190,8 +1227,18 @@ tbody tr:hover {
     }
 }
 
+@media (min-width: 769px) {
+    .menu-toggle {
+        display: none;
+    }
+    
+    .sidebar-overlay {
+        display: none !important;
+    }
+}
+
 /* Animations */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
-} 
+}

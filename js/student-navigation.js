@@ -2,6 +2,7 @@ class Navigation {
     constructor() {
         this.currentPage = 'dashboard';
         this.initializeNavigation();
+        this.initializeMobileMenu();
     }
 
     initializeNavigation() {
@@ -15,6 +16,56 @@ class Navigation {
 
         // Load trang mặc định
         this.loadPage('dashboard');
+    }
+
+    initializeMobileMenu() {
+        // Thêm sidebar overlay nếu chưa có
+        if (!document.getElementById('sidebarOverlay')) {
+            const overlay = document.createElement('div');
+            overlay.id = 'sidebarOverlay';
+            overlay.className = 'sidebar-overlay';
+            document.querySelector('.dashboard-container').prepend(overlay);
+        }
+
+        // Xử lý menu trên thiết bị di động
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        
+        if (menuToggle && sidebar && sidebarOverlay) {
+            // Hàm mở/đóng sidebar
+            const toggleSidebar = () => {
+                sidebar.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
+                
+                // Không thay đổi layout khi hiển thị trên mobile
+                // Giữ nguyên hiển thị dạng danh sách dọc
+            };
+            
+            // Sự kiện click vào nút menu
+            menuToggle.addEventListener('click', toggleSidebar);
+            
+            // Sự kiện click vào overlay để đóng sidebar
+            sidebarOverlay.addEventListener('click', toggleSidebar);
+            
+            // Sự kiện click vào các mục menu trên thiết bị di động
+            const menuItems = sidebar.querySelectorAll('li a');
+            menuItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    if (window.innerWidth <= 768) {
+                        toggleSidebar();
+                    }
+                });
+            });
+            
+            // Xử lý responsive khi thay đổi kích thước màn hình
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                }
+            });
+        }
     }
 
     async loadPage(page) {
@@ -72,5 +123,4 @@ class Navigation {
 
 
 
-    
- 
+

@@ -310,9 +310,6 @@
     <script src="js/auth.js"></script>
     <script src="js/admin.js"></script>
     <script>
-        // Khởi tạo đối tượng AdminDashboard
-        // const adminDashboard = new AdminDashboard();
-        
         // Kiểm tra quyền admin
         document.addEventListener('DOMContentLoaded', () => {
             const user = getCurrentUser();
@@ -358,12 +355,49 @@
                 }
             });
         });
-        
-        // Hàm đăng xuất
-        // function logout() {
-        //     clearCurrentUser();
-        //     window.location.href = 'login.html';
-        // }
+
+        // Mobile sidebar toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get elements
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            // Toggle sidebar on menu button click
+            if (menuToggle) {
+                menuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('open');
+                    overlay.classList.toggle('active');
+                });
+            }
+            
+            // Close sidebar when clicking on overlay
+            if (overlay) {
+                overlay.addEventListener('click', function() {
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('active');
+                });
+            }
+            
+            // Close sidebar when clicking menu items (mobile only)
+            const menuItems = document.querySelectorAll('.sidebar li');
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    if (window.innerWidth <= 768) {
+                        sidebar.classList.remove('open');
+                        overlay.classList.remove('active');
+                    }
+                });
+            });
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('active');
+                }
+            });
+        });
     </script>
 </body>
-</html> 
+</html>

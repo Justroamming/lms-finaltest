@@ -723,22 +723,48 @@ canvas#studentDistributionChart {
     
     .sidebar {
         position: fixed;
-        left: -290px;
+        left: -290px; /* Start off-screen */
         top: 0;
         height: 100%;
         z-index: 1000;
         transition: left 0.3s ease;
         box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        width: 280px; /* Ensure width is set */
     }
     
     .sidebar.open {
-        left: 0;
+        left: 0; /* Move on-screen when open class is added */
     }
     
     .main-content {
         width: 100%;
         margin-left: 0;
         padding: 0.5rem;
+    }
+    
+    /* Show menu toggle on mobile */
+    .menu-toggle {
+        display: flex !important; /* Force display */
+        align-items: center;
+        justify-content: center;
+        background: none;
+        border: none;
+        color: #333;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 0.5rem;
+    }
+    
+    /* Overlay for sidebar */
+    .overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
     }
     
     /* Điều chỉnh topbar */
@@ -1096,4 +1122,4 @@ body, html {
     .main-content {
         padding: 0.5rem;
     }
-} 
+}

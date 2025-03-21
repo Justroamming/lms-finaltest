@@ -79,10 +79,6 @@ body::before {
     animation: glowAnimation 5s infinite ease-in-out;
 }
 
-.login-box:hover {
-    transform: perspective(1000px) rotateY(2deg);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-}
 
 /* Hiệu ứng đường viền cho form */
 .login-box::before {
@@ -92,7 +88,29 @@ body::before {
     left: 0;
     width: 6px;
     height: 100%;
-    background: linear-gradient(to bottom, var(--primary-color), var(--primary-light));
+    background: linear-gradient(
+        to bottom,
+        var(--primary-color),
+        var(--primary-light),
+        #ff00de,
+        #ff66e5,
+        #00ff88,
+        #66ffb5,
+        #00a1ff,
+        #66c7ff,
+        var(--primary-color)
+    );
+    background-size: 100% 800%;
+    animation: smoothColorChange 10s infinite linear;
+}
+
+@keyframes smoothColorChange {
+    0% {
+        background-position: 0% 0%;
+    }
+    100% {
+        background-position: 0% 100%;
+    }
 }
 
 .login-header {

@@ -18,11 +18,13 @@ class TeacherDashboard {
             const welcomeElement = document.getElementById('teacherNameWelcome');
             const headerElement = document.getElementById('teacherName');
             
+            const fullName = `${teacherData.lastName} ${teacherData.firstName}`;
+            
             if (welcomeElement) {
-                welcomeElement.textContent = teacherData.lastName +" "+ teacherData.firstName || 'Giáo viên';
+                welcomeElement.textContent = fullName || 'Giáo viên';
             }
             if (headerElement) {
-                headerElement.textContent =  teacherData.lastName +" " +teacherData.firstName  || 'Giáo viên';
+                headerElement.textContent = fullName || 'Giáo viên';
             }
 
             // Update time

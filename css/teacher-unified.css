@@ -410,6 +410,7 @@ body::after {
     font-size: 0.9rem;
     margin: 0;
     font-weight: 500;
+    font-size: x-large;
 }
 
 /* Dashboard Grid */

@@ -536,7 +536,7 @@ class TeacherScores {
                 async () => {
                     try {
                         console.log('Xác nhận xóa điểm ID:', gradeID);
-                        const url = `${this.apiBaseUrl}/DeleteAStudentGradeByTeacher?gradeID=${gradeID}`;
+                        const url = `${this.apiBaseUrl}/DeleteTeacherStudentGrade?gradeID=${gradeID}`;
                         console.log('Gửi yêu cầu tới API:', url);
                         
                         const response = await fetch(url, {

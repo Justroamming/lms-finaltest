@@ -1,5 +1,6 @@
 class AdminDashboard {
     constructor() {
+        this.token=localStorage.getItem('token');
         this.currentPage = 'dashboard';
         this.pageContent = document.getElementById('pageContent');
         this.initializeNavigation();
@@ -106,13 +107,25 @@ class AdminDashboard {
     async initializeStudentDistributionChart() {
         try {
             // Lấy dữ liệu lớp học và số lượng học sinh
-            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts');
+            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const cohortsData = await cohortsResponse.json();
             const cohorts = cohortsData.data || [];
 
             // Lấy số lượng học sinh cho mỗi lớp
             const studentCounts = await Promise.all(cohorts.map(async (cohort) => {
-                const response = await fetch(`https://localhost:7231/RealAdmins/GetNumOfStudentsInACohort?id=${cohort.cohortId}`);
+                const response = await fetch(`https://localhost:7231/RealAdmins/GetNumOfStudentsInACohort?id=${cohort.cohortId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${this.token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
                 const data = await response.json();
                 return data[0]?.numOfStudents || 0;
             }));
@@ -192,7 +205,13 @@ class AdminDashboard {
     async updateQuickStats() {
         try {
             // Lấy tất cả học sinh
-            const studentsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllStudents');
+            const studentsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllStudents', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const studentsData = await studentsResponse.json();
             const students = studentsData.data || [];
 
@@ -204,13 +223,25 @@ class AdminDashboard {
             document.getElementById('genderRatio').textContent = `${malePercent}% / ${femalePercent}%`;
 
             // Lấy thông tin về lớp học
-            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts');
+            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const cohortsData = await cohortsResponse.json();
             const cohorts = cohortsData.data || [];
 
             // Lấy số lượng học sinh cho mỗi lớp
             const cohortStats = await Promise.all(cohorts.map(async (cohort) => {
-                const response = await fetch(`https://localhost:7231/RealAdmins/GetNumOfStudentsInACohort?id=${cohort.cohortId}`);
+                const response = await fetch(`https://localhost:7231/RealAdmins/GetNumOfStudentsInACohort?id=${cohort.cohortId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${this.token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
                 const data = await response.json();
                 return {
                     name: cohort.cohortName,
@@ -238,7 +269,13 @@ class AdminDashboard {
     }
 
     async loadCohortsForSelect() {
-        const response = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts');
+        const response = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${this.token}`,
+                'Content-Type': 'application/json'
+            }
+        });
         const data = await response.json();
         const cohorts = data.data || [];
     
@@ -250,23 +287,30 @@ class AdminDashboard {
     
     async loadStudents() {
         try {
-            const response = await fetch('https://localhost:7231/RealAdmins/GetAllStudents');
+            const response = await fetch('https://localhost:7231/RealAdmins/GetAllStudents', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             const data = await response.json();
     
-            console.log("API response:", data); 
-    
             const students = data.data || []; 
     
-            console.log("Parsed students:", students); 
-    
-            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts');
+            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const cohortsData = await cohortsResponse.json();
             const cohorts = cohortsData.data; 
-            console.log("API Cohorts Response:", cohorts); 
-
+    
             if (!Array.isArray(cohorts)) {
                console.error("Lỗi: API không trả về một mảng lớp!");
                return;
@@ -278,7 +322,6 @@ class AdminDashboard {
                 const cohortName = cohort ? cohort.cohortName : 'N/A';
                 return`
                 <tr>
-                
                     <td>${student.firstName}</td>
                     <td>${student.lastName}</td>     
                     <td>${student.email}</td>
@@ -302,7 +345,6 @@ class AdminDashboard {
             console.error("Error loading students:", error);
         }
     }
-    
 
     setupStudentEventListeners() {
         document.getElementById('addStudentBtn')?.addEventListener('click', () => {
@@ -374,7 +416,13 @@ class AdminDashboard {
                     this.showNotification('info', 'Đang tải dữ liệu', 'Vui lòng đợi trong giây lát...', null);
                     
                     // Gọi API để lấy thông tin học sinh
-                    const response = await fetch(`https://localhost:7231/RealAdmins/GetStudentById?id=${studentId}`);
+                    const response = await fetch(`https://localhost:7231/RealAdmins/GetStudentById?id=${studentId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${this.token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
                     
                     // Ẩn thông báo đang tải
                     this.hideNotification();
@@ -384,15 +432,11 @@ class AdminDashboard {
                     }
                     
                     const student = await response.json();
-                    console.log('Student data from API:', student);
-                    
                     // Điền thông tin học sinh vào form
                     if (student) {
                         // Xử lý các trường hợp khác nhau của API
                         const studentData = student.data || student;
                         
-                        // Log dữ liệu để kiểm tra
-                        console.log('Student data to fill form:', studentData);
                         
                         try {
                             // Form fields
@@ -437,18 +481,6 @@ class AdminDashboard {
                                 }
                             }
                             
-                            // Log các trường đã điền
-                            console.log('Form filled with the following values:', {
-                                lastName: lastNameField?.value,
-                                firstName: firstNameField?.value,
-                                email: emailField?.value,
-                                gender: genderField?.value,
-                                address: addressField?.value,
-                                dob: dobField?.value,
-                                phone: phoneField?.value,
-                                password: passwordField?.value,
-                                cohortId: cohortIdField?.value
-                            });
                         } catch (formError) {
                             console.error('Error filling form fields:', formError);
                         }
@@ -548,34 +580,30 @@ class AdminDashboard {
         }
     }
 
-
-
     async initializeTeacherManagement() {
         await this.loadTeachers();
         this.setupTeacherEventListeners();
     }
 
-    
-
     async loadTeachers() {
         try {
-            const response = await fetch('https://localhost:7231/RealAdmins/GetAllTeacher');
+            const response = await fetch('https://localhost:7231/RealAdmins/GetAllTeacher', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             const data = await response.json();
     
-            console.log("API response:", data);
-    
             const teachers = data.data || []; 
-    
-            console.log("Parsed students:", teachers); 
     
             const tbody = document.querySelector('#teacherTable tbody');
             tbody.innerHTML = teachers.map(teacher => `
                 <tr>
-                
-                    
                     <td>${teacher.lastName}</td>
                     <td>${teacher.firstName}</td>
                     <td>${teacher.email}</td>
@@ -600,7 +628,6 @@ class AdminDashboard {
         }
     }
     
-
     setupTeacherEventListeners() {
         document.getElementById('addTeacherBtn')?.addEventListener('click', () => {
             this.openTeacherModal();
@@ -668,7 +695,13 @@ class AdminDashboard {
                     this.showNotification('info', 'Đang tải dữ liệu', 'Vui lòng đợi trong giây lát...', null);
                     
                     // Gọi API để lấy thông tin giáo viên
-                    const response = await fetch(`https://localhost:7231/RealAdmins/GetTeacherById?id=${teacherId}`);
+                    const response = await fetch(`https://localhost:7231/RealAdmins/GetTeacherById?id=${teacherId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${this.token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
                     
                     // Ẩn thông báo đang tải
                     this.hideNotification();
@@ -684,9 +717,6 @@ class AdminDashboard {
                     if (teacher) {
                         // Xử lý các trường hợp khác nhau của API
                         const teacherData = teacher.data || teacher;
-                        
-                        // Log dữ liệu để kiểm tra
-                        console.log('Teacher data to fill form:', teacherData);
                         
                         try {
                             // Form fields
@@ -719,17 +749,6 @@ class AdminDashboard {
                             if (phoneField) phoneField.value = teacherData.phone || '';
                             if (passwordField) passwordField.value = teacherData.password || '';
                             
-                            // Log các trường đã điền
-                            console.log('Form filled with the following values:', {
-                                lastName: lastNameField?.value,
-                                firstName: firstNameField?.value,
-                                email: emailField?.value,
-                                gender: genderField?.value,
-                                address: addressField?.value,
-                                dob: dobField?.value,
-                                phone: phoneField?.value,
-                                password: passwordField?.value
-                            });
                         } catch (formError) {
                             console.error('Error filling form fields:', formError);
                         }
@@ -829,20 +848,22 @@ class AdminDashboard {
         }
     }
 
-
-
     async initializeCohortManagement() {
         await this.loadCohorts();
         this.setupCohortEventListeners();
         
     }
 
-
     async  loadCohorts() {
         try {
-            const response = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts');
+            const response = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const data = await response.json();
-            console.log("API Cohorts Response:", data);
     
             const cohorts = data.data; 
     
@@ -854,7 +875,13 @@ class AdminDashboard {
             // Get student counts for each cohort
             const studentCounts = await Promise.all(cohorts.map(async (co) => {
                 try {
-                    const res = await fetch(`https://localhost:7231/RealAdmins/GetNumOfStudentsInACohort?id=${co.cohortId}`);
+                    const res = await fetch(`https://localhost:7231/RealAdmins/GetNumOfStudentsInACohort?id=${co.cohortId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${this.token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
                     const countData = await res.json();
                     
                     if (Array.isArray(countData) && countData.length > 0) {
@@ -898,7 +925,13 @@ class AdminDashboard {
 
     async printStudentInfo(cohortId) {
         try {
-            const res = await fetch(`https://localhost:7231/RealAdmins/GetStudentsInCohort?id=${cohortId}`);
+            const res = await fetch(`https://localhost:7231/RealAdmins/GetStudentsInCohort?id=${cohortId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const students = await res.json();
     
             if (!Array.isArray(students) || students.length === 0) {
@@ -964,12 +997,6 @@ class AdminDashboard {
             alert("Không thể tải danh sách sinh viên!");
         }
     }
-    
-    
-    
-    
-    
-
 
     setupCohortEventListeners() {
         document.getElementById('addCohortBtn')?.addEventListener('click', () => {
@@ -1013,7 +1040,6 @@ class AdminDashboard {
         }
     }
 
-
     async openCohortModal(cohortId = null) {
         // Đặt tiêu đề modal tùy theo thêm mới hay chỉnh sửa
         const modalTitle = document.querySelector('#cohortModal .modal-header h3');
@@ -1039,7 +1065,13 @@ class AdminDashboard {
                     this.showNotification('info', 'Đang tải dữ liệu', 'Vui lòng đợi trong giây lát...', null);
                     
                     // Gọi API để lấy thông tin lớp học
-                    const response = await fetch(`https://localhost:7231/RealAdmins/GetCohortById?id=${cohortId}`);
+                    const response = await fetch(`https://localhost:7231/RealAdmins/GetCohortById?id=${cohortId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${this.token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
                     
                     // Ẩn thông báo đang tải
                     this.hideNotification();
@@ -1049,15 +1081,11 @@ class AdminDashboard {
                     }
                     
                     const cohort = await response.json();
-                    console.log('Cohort data from API:', cohort);
                     
                     // Điền thông tin lớp học vào form
                     if (cohort) {
                         // Xử lý các trường hợp khác nhau của API
                         const cohortData = cohort.data || cohort;
-                        
-                        // Log dữ liệu để kiểm tra
-                        console.log('Cohort data to fill form:', cohortData);
                         
                         try {
                             // Form fields
@@ -1068,11 +1096,6 @@ class AdminDashboard {
                             if (nameField) nameField.value = cohortData.name || cohortData.CName || '';
                             if (descriptionField) descriptionField.value = cohortData.description || cohortData.Description || '';
                             
-                            // Log các trường đã điền
-                            console.log('Form filled with the following values:', {
-                                name: nameField?.value,
-                                description: descriptionField?.value
-                            });
                         } catch (formError) {
                             console.error('Error filling form fields:', formError);
                         }
@@ -1085,8 +1108,7 @@ class AdminDashboard {
                     this.showNotification('error', 'Lỗi tải dữ liệu', 'Không thể tải thông tin lớp học. Vui lòng thử lại sau.');
                 }
             }
-        }
-        
+        }  
         // Mở modal
         this.openModal('cohortModal');
     }
@@ -1157,7 +1179,9 @@ class AdminDashboard {
 
         const response = await fetch(url, {
             method,
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 
+                'Authorization': `Bearer ${this.token}`,
+                'Content-Type': 'application/json' }
         });
 
         if (!response.ok) throw new Error(`Failed to ${isUpdating ? "update" : "create"} cohort`);
@@ -1198,6 +1222,7 @@ class AdminDashboard {
         const response = await fetch(`https://localhost:7231/RealAdmins/DeleteCohort?id=${cohortId}`, {
             method: 'DELETE',
             headers: {
+                'Authorization': `Bearer ${this.token}`,
                 'Content-Type': 'application/json'
             }
         });
@@ -1209,7 +1234,6 @@ class AdminDashboard {
         
         return true;
     }
-
     
     async initializeSubjectManagement() {
         await this.loadSubjects();
@@ -1218,9 +1242,14 @@ class AdminDashboard {
 
     async loadSubjects() {
         try {
-            const response = await fetch('https://localhost:7231/RealAdmins/GetAllSubjects');
+            const response = await fetch('https://localhost:7231/RealAdmins/GetAllSubjects', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const data = await response.json();
-            console.log("API Subjects Response:", data);
     
             const subjects = data.data; 
     
@@ -1271,7 +1300,6 @@ class AdminDashboard {
             await this.saveSubject();
         });
 
-    
         document.getElementById('searchSubject')?.addEventListener('input', (e) => {
             this.searchSubjects(e.target.value);
         });
@@ -1281,7 +1309,6 @@ class AdminDashboard {
         const modal = document.getElementById('subjectModal');
         const form = document.getElementById('subjectForm');
         const modalTitle = document.getElementById('subjectModalTitle');
-        
 
         modalTitle.textContent = subjectId ? 'Chỉnh sửa môn học' : 'Thêm môn học mới';
         
@@ -1314,7 +1341,6 @@ class AdminDashboard {
         });
         
         try {
-            console.log('Dữ liệu môn học:', subjectData);
             // Xác thực dữ liệu
             if (!subjectData.subjectName) {
                 throw new Error('Vui lòng điền đầy đủ thông tin bắt buộc!');
@@ -1349,7 +1375,6 @@ class AdminDashboard {
     async saveSubjectRequest(subjectData) {
         const params = new URLSearchParams({
             id: subjectData.subjectId || "",
-           
             sName: subjectData.subjectName,
        
         });
@@ -1363,7 +1388,9 @@ class AdminDashboard {
 
         const response = await fetch(url, {
             method,
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 
+                'Authorization': `Bearer ${this.token}`,
+                'Content-Type': 'application/json' }
         });
 
         if (!response.ok) throw new Error(`Lỗi ${isUpdating ? "cập nhật" : "tạo mới"} môn học: ${response.status}`);
@@ -1400,6 +1427,7 @@ class AdminDashboard {
         const response = await fetch(`https://localhost:7231/RealAdmins/DeleteASubject?id=${subjectId}`, {
             method: 'DELETE',
             headers: {
+                'Authorization': `Bearer ${this.token}`,
                 'Content-Type': 'application/json'
             }
         });
@@ -1452,7 +1480,13 @@ class AdminDashboard {
 
     async loadAssignments() {
         try {
-            const response = await fetch('https://localhost:7231/RealAdmins/GetAllTeacherSchedule');
+            const response = await fetch('https://localhost:7231/RealAdmins/GetAllTeacherSchedule', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -1460,17 +1494,35 @@ class AdminDashboard {
             const assignments = data || [];
 
             // Lấy thông tin giáo viên
-            const teachersResponse = await fetch('https://localhost:7231/RealAdmins/GetAllTeacher');
+            const teachersResponse = await fetch('https://localhost:7231/RealAdmins/GetAllTeacher', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const teachersData = await teachersResponse.json();
             const teachers = teachersData.data || [];
 
             // Lấy thông tin môn học
-            const subjectsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllSubjects');
+            const subjectsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllSubjects', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const subjectsData = await subjectsResponse.json();
             const subjects = subjectsData.data || [];
 
             // Lấy thông tin lớp học
-            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts');
+            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const cohortsData = await cohortsResponse.json();
             const cohorts = cohortsData.data || [];
 
@@ -1511,19 +1563,16 @@ class AdminDashboard {
         }
     }
 
-    getStatusText(status) {
-        const statusMap = {
-            'active': 'Đang hoạt động',
-            'pending': 'Chờ xử lý',
-            'completed': 'Đã hoàn thành'
-        };
-        return statusMap[status] || status;
-    }
-
     async loadAssignmentFormData() {
         try {
             // Load danh sách giáo viên
-            const teachersResponse = await fetch('https://localhost:7231/RealAdmins/GetAllTeacher');
+            const teachersResponse = await fetch('https://localhost:7231/RealAdmins/GetAllTeacher', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const teachersData = await teachersResponse.json();
             const teachers = teachersData.data || [];
             
@@ -1533,7 +1582,13 @@ class AdminDashboard {
             ).join('');
 
             // Load danh sách môn học
-            const subjectsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllSubjects');
+            const subjectsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllSubjects', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const subjectsData = await subjectsResponse.json();
             const subjects = subjectsData.data || [];
             
@@ -1543,7 +1598,13 @@ class AdminDashboard {
             ).join('');
 
             // Load danh sách lớp học
-            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts');
+            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const cohortsData = await cohortsResponse.json();
             const cohorts = cohortsData.data || [];
             
@@ -1577,15 +1638,19 @@ class AdminDashboard {
         const form = document.getElementById('assignmentForm');
         console.log("Lesson Class ID:", lessonClassId);
         if (lessonClassId) {
-            const response = await fetch(`https://localhost:7231/RealAdmins/GetLessonSchedulebyID?id=${lessonClassId}`);
+            const response = await fetch(`https://localhost:7231/RealAdmins/GetLessonSchedulebyID?id=${lessonClassId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const assignmentArray = await response.json();
             const assignment = assignmentArray[0]; // Access the first item in the array
-            console.log("Lesson Class ID:", assignment.lessonClassId);
         
             Object.keys(assignment).forEach(key => {
                 const input = form.querySelector(`[name="${key}"]`);
                 if (input) input.value = assignment[key];
-                console.log("Key:", key, "Value:", assignment[key]);
             });
         } else {
             form.reset();
@@ -1598,8 +1663,7 @@ class AdminDashboard {
         const form = document.getElementById('assignmentForm');
         const formData = new FormData(form);
         const assignmentData = Object.fromEntries(formData.entries());
-        console.log("Form Data:", assignmentData);
-    
+
         const isUpdating = assignmentData.lessonClassId && assignmentData.lessonClassId.trim() !== "";
         const params = new URLSearchParams({
             lessonClassID: assignmentData.lessonClassId || "",
@@ -1616,13 +1680,14 @@ class AdminDashboard {
             ? `https://localhost:7231/RealAdmins/UpdateAssignedTeacher?${params}`
             : `https://localhost:7231/RealAdmins/AssignTeacher?${params}`;
 
-    
         const method = isUpdating ? "PUT" : "POST";
     
         try {
             const response = await fetch(url, {
                 method,
-                headers: { 'Content-Type': 'application/json' }
+                headers: { 
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json' }
             });
     
             if (!response.ok) throw new Error(`Failed to ${isUpdating ? "update" : "create"} assignment`);
@@ -1640,7 +1705,10 @@ class AdminDashboard {
 
         try {
             const response = await fetch(`https://localhost:7231/RealAdmins/DeleteAssignedTeacher?lessonClassID=${lessonClassId}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: { 
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json' }
             });
 
             if (!response.ok) throw new Error('Failed to delete assignment');
@@ -1672,60 +1740,36 @@ class AdminDashboard {
             console.error("Error in searchAssignments:", error);
         }
     }
-
-    async initializeAccountManagement() {
-        await this.loadAccounts();
-        this.setupAccountEventListeners();
-    }
-
-    async loadAccounts() {
-        const teachersResponse = await fetch('https://localhost:7231/Teacher/GetAllTeacher');
-        const teachersData = await teachersResponse.json();
-        const teachers = teachersData.data || [];
-        const studentsResponse = await fetch('https://localhost:7231/Student/GetAllStudents');
-        const studentsData = await studentsResponse.json();
-        const students = studentsData.data || [];
-        const adminsResponse = await fetch('https://localhost:7231/Admin/GetAllAdmins');
-        const adminsData = await adminsResponse.json();
-        const admins = adminsData.data || [];
-        
-        const accounts = [
-            ...admins.map(a => ({...a, type: 'Admin'})),
-            ...teachers.map(t => ({...t, type: 'Giáo viên'})),
-            ...students.map(s => ({...s, type: 'Học sinh'}))
-        ];
-        
-        const tbody = document.querySelector('#accountTable tbody');
-        tbody.innerHTML = accounts.map(acc => `
-            <tr>
-                <td>${acc.email}</td>
-                <td>${acc.type}</td>
-                <td>${acc.lastName || ''} ${acc.firstName || ''}</td>
-       
-                <td>
-                    <button onclick="adminDashboard.resetPassword('${acc.email}')" class="btn-edit">
-                        <i class="fas fa-key"></i>
-                    </button>
-                    <button onclick="adminDashboard.toggleAccountStatus('${acc.email}')" class="btn-warning">
-                        <i class="fas fa-ban"></i>
-                    </button>
-                </td>
-            </tr>
-        `).join('');
-    }
-
     
     async  getSystemStats() {   
         try {
-            const studentsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllStudents');
+            const studentsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllStudents', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const studentsData = await studentsResponse.json();
             const students = studentsData.data || [];
             
-            const teachersResponse = await fetch('https://localhost:7231/RealAdmins/GetAllTeacher');
+            const teachersResponse = await fetch('https://localhost:7231/RealAdmins/GetAllTeacher', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const teachersData = await teachersResponse.json();
             const teachers = teachersData.data || [];
 
-            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts');
+            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const cohortsData = await cohortsResponse.json();
             const cohorts = cohortsData.data || [];
     
@@ -2021,7 +2065,9 @@ class AdminDashboard {
 
         const response = await fetch(url, {
             method,
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 
+                'Authorization': `Bearer ${this.token}`,
+                'Content-Type': 'application/json' }
         });
 
         if (!response.ok) throw new Error(`Failed to ${isUpdating ? "update" : "create"} student`);
@@ -2069,7 +2115,9 @@ class AdminDashboard {
 
         const response = await fetch(url, {
             method,
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 
+                'Authorization': `Bearer ${this.token}`,
+                'Content-Type': 'application/json' }
         });
 
         if (!response.ok) throw new Error(`Failed to ${isUpdating ? "update" : "create"} teacher`);
@@ -2082,6 +2130,7 @@ class AdminDashboard {
         const response = await fetch(`https://localhost:7231/RealAdmins/DeleteTeacher?id=${teacherId}`, {
             method: 'DELETE',
             headers: {
+                'Authorization': `Bearer ${this.token}`,
                 'Content-Type': 'application/json'
             }
         });

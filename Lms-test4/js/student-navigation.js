@@ -1,5 +1,5 @@
 class Navigation {
-    constructor() {
+    constructor() { 
         this.currentPage = 'dashboard';
         this.initializeNavigation();
     }

@@ -1,15 +1,13 @@
 class TeacherScores {
     constructor() {
+        this.token=localStorage.getItem('token');
         this.apiBaseUrl = 'https://localhost:7231/ScoreTeachers'; // Replace with your API base URL
         this.teacher = JSON.parse(sessionStorage.getItem('currentUser'));
         this.setupEventListeners();
         this.loadCohorts();
-
     }
 
     setupEventListeners() {
-        
-
         document.getElementById('scoreForm')?.addEventListener('submit', (e) => {
             e.preventDefault();
             this.saveScore();
@@ -24,7 +22,13 @@ class TeacherScores {
     async loadCohorts() {
      
         try {
-            const response = await fetch(`${this.apiBaseUrl}/GetAllCohortteachbyateacher?id=${this.teacher.teacherId}`);
+            const response = await fetch(`${this.apiBaseUrl}/GetAllCohortteachbyateacher?id=${this.teacher.teacherId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const cohorts = await response.json();
             const classFilter = document.getElementById('classFilter');
            
@@ -38,7 +42,13 @@ class TeacherScores {
                     `).join('')}
                 `;
 
-            const subjectresponse = await fetch(`${this.apiBaseUrl}/GetTeacherAllSubjectsTeach?id=${this.teacher.teacherId}`);
+            const subjectresponse = await fetch(`${this.apiBaseUrl}/GetTeacherAllSubjectsTeach?id=${this.teacher.teacherId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const subjects = await subjectresponse.json();
             const subject = document.getElementById('subjectID');    
             if(subject){
@@ -63,9 +73,21 @@ class TeacherScores {
 
     async filterStudentsByCohort(cohortId) {
         try {
-        const response = await fetch(`${this.apiBaseUrl}/GetTeacherAllStudentGrades?id=${this.teacher.teacherId}`);
+        const response = await fetch(`${this.apiBaseUrl}/GetTeacherAllStudentGrades?id=${this.teacher.teacherId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${this.token}`,
+                'Content-Type': 'application/json'
+            }
+        });
             const scores = await response.json();
-            const studentsResponse = await fetch(`${this.apiBaseUrl}/GetTeacherAllTeachStudentsByCohort?id=${this.teacher.teacherId}`);
+            const studentsResponse = await fetch(`${this.apiBaseUrl}/GetTeacherAllTeachStudentsByCohort?id=${this.teacher.teacherId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const students = await studentsResponse.json();
             const studentSelect = document.getElementById('studentID');
             if(studentSelect){
@@ -129,7 +151,13 @@ class TeacherScores {
         const form = document.getElementById('scoreForm');
 
         if (gradeID) {
-            const response = await fetch(`${this.apiBaseUrl}/GetAOneStudentGradeByTeacher?gradeID=${gradeID}`);
+            const response = await fetch(`${this.apiBaseUrl}/GetAOneStudentGradeByTeacher?gradeID=${gradeID}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const ScoreArray = await response.json();
           
             
@@ -184,7 +212,9 @@ class TeacherScores {
             const method = isupdating ? 'PUT' : 'POST';
             const response = await fetch(url, {
                 method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json' },
               
             });
     
@@ -210,7 +240,10 @@ class TeacherScores {
         console.log("gradeID: ",gradeID);
         try {
             await fetch(`${this.apiBaseUrl}/DeleteTeacherStudentGrade?gradeID=${gradeID}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: { 
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json' },
             });
 
             await this.filterStudentsByCohort(document.getElementById('classFilter').value);
@@ -229,7 +262,6 @@ class TeacherScores {
         return score >= 0 && score <= 10;
     }
 }
-
 
 document.addEventListener('DOMContentLoaded', () => {
     const teacherScoresInstance = new TeacherScores();

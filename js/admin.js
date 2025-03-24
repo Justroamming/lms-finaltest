@@ -403,6 +403,9 @@ class AdminDashboard {
                         <button class="btn-delete" data-id="${student.studentId}">
                             <i class="fas fa-trash"></i>
                         </button>
+                        <button class="btn-print" data-id="${student.studentId}" data-cohort="${student.cohortId || ''}">
+                            <i class="fas fa-print"></i>
+                        </button>
                     </td>
                 </tr>
             `}).join('');

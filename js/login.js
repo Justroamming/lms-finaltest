@@ -48,8 +48,18 @@ const login = async (email, password) => {
             body: JSON.stringify({ email, password })
         });
 
+<<<<<<< HEAD:Lms-test4/js/login.js
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
+=======
+        if (response.ok) {
+            const student = await response.json();
+            // Lưu thông tin học sinh vào localStorage
+            localStorage.setItem('currentStudent', JSON.stringify(student));
+            window.location.href = 'student-dashboard.html';
+        } else {
+            alert('Email, mật khẩu hoặc không đúng!');
+>>>>>>> 303703d2e13d4d23372b1f345b45542aaae87393:js/login.js
         }
 
         const data = await response.json();

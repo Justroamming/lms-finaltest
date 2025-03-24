@@ -21,6 +21,9 @@ class TeacherScores {
             // Đảm bảo các popup tồn tại
             this.ensurePopupsExist();
             
+            // Đảm bảo các phần tử lọc tồn tại
+            this.ensureFilterElements();
+            
             // Thiết lập phần lọc và giao diện
             this.setupFilterSection();
             
@@ -67,10 +70,19 @@ class TeacherScores {
         // Lắng nghe sự kiện cho bộ lọc lớp học
         const classFilter = document.getElementById('classFilter');
         if (classFilter) {
-            classFilter.addEventListener('change', () => {
-                const cohortId = classFilter.value;
-                this.filterStudentsByCohort(cohortId);
-            });
+            classFilter.addEventListener('change', () => this.applyFilters());
+        }
+        
+        // Lắng nghe sự kiện cho bộ lọc môn học
+        const subjectFilter = document.getElementById('subjectFilter');
+        if (subjectFilter) {
+            subjectFilter.addEventListener('change', () => this.applyFilters());
+        }
+        
+        // Lắng nghe sự kiện cho trường tìm kiếm học sinh
+        const studentSearch = document.getElementById('studentSearch');
+        if (studentSearch) {
+            studentSearch.addEventListener('input', () => this.applyFilters());
         }
         
         // Thiết lập sự kiện cho các popup
@@ -187,79 +199,12 @@ class TeacherScores {
             const students = await this.safeParseJson(studentsResponse);
             console.log('Số lượng học sinh tải được:', students.length);
             
-            // Cập nhật dropdown học sinh dựa trên lớp được chọn
-            const studentSelect = document.getElementById('studentID');
-            if (studentSelect) {
-                studentSelect.innerHTML = `
-                    <option value="">Tất cả học sinh</option>
-                    ${students
-                        .filter(s => !cohortId || s.cohortID === cohortId)
-                        .map(student => `
-                            <option value="${student.studentID}">
-                                ${student.studentName}
-                            </option>
-                        `)
-                        .join('')
-                    }
-                `;
-            }
+            // Lưu dữ liệu vào biến instance để sử dụng cho việc lọc
+            this.allScores = scores;
+            this.allStudents = students;
             
-            // Kiểm tra và lọc kết quả
-            if (!tbody) {
-                console.error('Không tìm thấy bảng điểm');
-                return;
-            }
-            
-            // Lọc và hiển thị điểm dựa trên lớp học
-            const filteredScores = scores.filter(score => {
-                const student = students.find(s => s.studentID === score.studentID);
-                return student && (!cohortId || student.cohortID === cohortId);
-            });
-            
-            console.log('Số lượng điểm sau khi lọc:', filteredScores.length);
-            
-            if (filteredScores.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="9" class="text-center">
-                            Chưa có dữ liệu điểm cho lớp này
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            // Hiển thị kết quả
-            tbody.innerHTML = filteredScores.map(score => {
-                const student = students.find(s => s.studentID === score.studentID);
-                if (!student) return '';
-                
-                return `
-                    <tr>
-                        <td>${student.studentName || 'N/A'}</td>
-                        <td>${student.cohortName || 'N/A'}</td>
-                        <td>${score.subjectName || 'N/A'}</td>
-                        <td>${score.testType || 'N/A'}</td>
-                        <td>${score.score || 'N/A'}</td>
-                        <td>${score.weight || '0'}%</td>
-                        <td>${score.testDate ? new Date(score.testDate).toLocaleDateString('vi-VN') : 'N/A'}</td>
-                        <td>${score.gradeDate ? new Date(score.gradeDate).toLocaleDateString('vi-VN') : 'N/A'}</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn-edit" data-id="${score.gradeID}">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn-delete" data-id="${score.gradeID}">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-            
-            // Thiết lập sự kiện cho các nút
-            this.setupTableEventListeners();
+            // Áp dụng các bộ lọc
+            this.applyFilters();
             
         } catch (error) {
             console.error('Lỗi khi lọc học sinh theo lớp:', error);
@@ -280,6 +225,107 @@ class TeacherScores {
             
             // Hiển thị thông báo lỗi
             this.showNotification('error', 'Lỗi', 'Không thể tải danh sách học sinh: ' + error.message);
+        }
+    }
+
+    applyFilters() {
+        try {
+            // Kiểm tra sự tồn tại của các phần tử lọc
+            const classFilter = document.getElementById('classFilter');
+            const subjectFilter = document.getElementById('subjectFilter');
+            const studentSearch = document.getElementById('studentSearch');
+            
+            if (!classFilter || !subjectFilter || !studentSearch) {
+                console.error('Không tìm thấy các phần tử lọc');
+                return;
+            }
+            
+            const cohortId = classFilter.value;
+            const subjectId = subjectFilter.value;
+            const searchText = studentSearch.value.toLowerCase();
+            
+            console.log('Áp dụng bộ lọc:', { cohortId, subjectId, searchText });
+            
+            // Kiểm tra dữ liệu cần thiết
+            if (!this.allScores || !this.allStudents) {
+                console.error('Chưa có dữ liệu để lọc');
+                return;
+            }
+            
+            // Lọc điểm dựa trên các điều kiện
+            let filteredScores = [...this.allScores];
+            
+            // Lọc theo lớp nếu có chọn lớp
+            if (cohortId) {
+                filteredScores = filteredScores.filter(score => {
+                    const student = this.allStudents.find(s => s.studentID === score.studentID);
+                    return student && student.cohortID === cohortId;
+                });
+            }
+            
+            // Lọc theo môn học nếu có chọn môn
+            if (subjectId) {
+                filteredScores = filteredScores.filter(score => score.subjectID === subjectId);
+            }
+            
+            // Lọc theo tên học sinh nếu có nhập tên
+            if (searchText) {
+                filteredScores = filteredScores.filter(score => {
+                    const student = this.allStudents.find(s => s.studentID === score.studentID);
+                    return student && student.studentName.toLowerCase().includes(searchText);
+                });
+            }
+            
+            console.log('Số lượng điểm sau khi lọc:', filteredScores.length);
+            
+            // Hiển thị kết quả
+            const tbody = document.querySelector('#scoreTable tbody');
+            if (tbody) {
+                if (filteredScores.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="9" class="text-center">
+                                Không tìm thấy dữ liệu phù hợp với bộ lọc
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                tbody.innerHTML = filteredScores.map(score => {
+                    const student = this.allStudents.find(s => s.studentID === score.studentID);
+                    if (!student) return '';
+                    
+                    return `
+                        <tr>
+                            <td>${student.studentName || 'N/A'}</td>
+                            <td>${student.cohortName || 'N/A'}</td>
+                            <td>${score.subjectName || 'N/A'}</td>
+                            <td>${score.testType || 'N/A'}</td>
+                            <td>${score.score || 'N/A'}</td>
+                            <td>${score.weight || '0'}%</td>
+                            <td>${score.testDate ? new Date(score.testDate).toLocaleDateString('vi-VN') : 'N/A'}</td>
+                            <td>${score.gradeDate ? new Date(score.gradeDate).toLocaleDateString('vi-VN') : 'N/A'}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-edit" data-id="${score.gradeID}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn-delete" data-id="${score.gradeID}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+                
+                // Thiết lập sự kiện cho các nút
+                this.setupTableEventListeners();
+            }
+        } catch (error) {
+            console.error('Lỗi khi áp dụng bộ lọc:', error);
+            this.showNotification('error', 'Lỗi', 'Không thể áp dụng bộ lọc: ' + error.message);
         }
     }
 
@@ -370,40 +416,17 @@ class TeacherScores {
             if (gradeID) {
                 document.getElementById('modalTitle').textContent = 'Chỉnh Sửa Điểm';
                 
-                // Kiểm tra một số đường dẫn API khác nhau
-                const apiPaths = [
-                    `/GetAOneStudentGradeByTeacher?gradeID=${gradeID}`,
-                    `/GetTeacherStudentGrade?gradeID=${gradeID}`,
-                    `/GetStudentGradeByID?gradeID=${gradeID}`
-                ];
+                // Use the correct API endpoint to fetch score data
+                const url = `${this.apiBaseUrl}/GetAOneStudentGradeByTeacher?gradeID=${gradeID}`;
                 
-                let scoreData = null;
-                let successResponse = false;
+                console.log('Gửi yêu cầu tới API để lấy thông tin điểm:', url);
                 
-                // Thử từng đường dẫn cho đến khi thành công
-                for (const path of apiPaths) {
-                    try {
-                        const url = `${this.apiBaseUrl}${path}`;
-                        console.log('Thử gửi yêu cầu tới API:', url);
-                        
-                        const response = await fetch(url);
-                        if (response.ok) {
-                            console.log('Nhận phản hồi thành công từ API:', url);
-                            scoreData = await this.safeParseJson(response);
-                            successResponse = true;
-                            break;
-                        }
-                    } catch (err) {
-                        console.warn(`Không thể tải dữ liệu từ ${path}:`, err);
-                    }
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
                 
-                if (!successResponse) {
-                    // Nếu không tìm thấy dữ liệu từ API, hiển thị modal với thông báo lỗi
-                    this.showNotification('error', 'Lỗi', 'Không thể tải thông tin điểm. Vui lòng thử lại sau.');
-                    return;
-                }
-                
+                const scoreData = await this.safeParseJson(response);
                 console.log('Dữ liệu điểm:', scoreData);
                 
                 // Kiểm tra dữ liệu trước khi điền vào form
@@ -441,9 +464,27 @@ class TeacherScores {
                         document.getElementById('gradeDate').value = '';
                     }
                 }
+                
+                // Cập nhật nút submit trong form để sử dụng method PUT
+                const submitButton = form.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    submitButton.textContent = 'Cập nhật điểm';
+                    submitButton.onclick = async (e) => {
+                        e.preventDefault();
+                        this.saveScore();
+                        return false;
+                    };
+                }
             } else {
                 document.getElementById('modalTitle').textContent = 'Thêm Điểm Mới';
                 form.reset();
+                
+                // Đặt lại hành vi mặc định cho nút submit
+                const submitButton = form.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    submitButton.textContent = 'Lưu điểm';
+                    submitButton.onclick = null;
+                }
             }
             
             modal.style.display = 'block';
@@ -464,49 +505,64 @@ class TeacherScores {
                 return;
             }
             
-            // Lấy dữ liệu từ form
-            const formData = new FormData(form);
-            const isNewGrade = !formData.get('gradeID');
+            // Get all form values
+            const gradeId = document.getElementById('gradeID')?.value?.trim();
+            const studentId = document.getElementById('studentID')?.value?.trim();
+            const scoreValue = parseFloat(document.getElementById('score')?.value);
+            const subject = document.getElementById('subjectID')?.value?.trim();
+            const type = document.getElementById('testType')?.value?.trim();
+            const weight = parseFloat(document.getElementById('weight')?.value?.trim());
+            const testDate = document.getElementById('testDate')?.value?.trim();
+            const date = document.getElementById('gradeDate')?.value?.trim();
             
-            // Chuyển FormData thành JSON
-            const scoreData = {};
-            formData.forEach((value, key) => {
-                scoreData[key] = value;
+            // Validate score
+            if (scoreValue < 0 || scoreValue > 10) {
+                this.showNotification('warning', 'Lỗi dữ liệu', 'Điểm số phải từ 0 đến 10!');
+                return;
+            }
+            
+            const isUpdating = Boolean(gradeId);
+            
+            // Build URL with parameters
+            const params = new URLSearchParams({
+                gradeID: gradeId || '',
+                studentID: studentId,
+                score: scoreValue,
+                teacherID: this.teacher.teacherId,
+                gradeDate: date,
+                subjectID: subject,
+                testType: type,
+                testDate: testDate,
+                weight: weight
             });
             
-            console.log('Dữ liệu điểm cần lưu:', scoreData);
-            
-            // Thực hiện gửi API request
-            const url = isNewGrade
-                ? `${this.apiBaseUrl}/PostAStudentGradeByTeacher`
-                : `${this.apiBaseUrl}/UpdateAStudentGradeByTeacher`;
-            
-            console.log('Gửi yêu cầu tới API:', url);
+            // Choose the correct endpoint based on whether we're updating or inserting
+            const url = isUpdating 
+                ? `${this.apiBaseUrl}/UpdateTeacherStudentGrade?${params}` 
+                : `${this.apiBaseUrl}/InsertTeacherStudentGrade?${params}`;
+                
+            console.log(`Gửi yêu cầu ${isUpdating ? 'PUT' : 'POST'} tới API:`, url);
             
             const response = await fetch(url, {
-                method: isNewGrade ? 'POST' : 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(scoreData)
+                method: isUpdating ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json' }
             });
             
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             
-            console.log('Nhận phản hồi từ API');
             const result = await this.safeParseJson(response);
-            console.log('Kết quả lưu điểm:', result);
+            console.log(`Kết quả ${isUpdating ? 'cập nhật' : 'thêm mới'} điểm:`, result);
             
-            // Đóng modal và hiện thông báo
+            // Đóng modal
             modal.style.display = 'none';
             
             // Hiển thị thông báo thành công
             this.showNotification(
                 'success',
-                isNewGrade ? 'Thêm điểm thành công' : 'Cập nhật điểm thành công',
-                isNewGrade ? 'Đã thêm mới điểm thành công.' : 'Đã cập nhật điểm thành công.',
+                isUpdating ? 'Cập nhật điểm thành công' : 'Thêm điểm thành công',
+                isUpdating ? 'Đã cập nhật điểm thành công.' : 'Đã thêm mới điểm thành công.',
                 () => {
                     // Tải lại danh sách điểm
                     const cohortId = document.getElementById('classFilter').value;
@@ -1024,6 +1080,11 @@ class TeacherScores {
                 </div>
                 
                 <div class="filter-item">
+                    <label for="studentSearch">Tìm kiếm học sinh</label>
+                    <input type="text" id="studentSearch" class="filter-select" placeholder="Nhập tên học sinh...">
+                </div>
+                
+                <div class="filter-item">
                     <label>&nbsp;</label>
                     <button id="addScoreBtn" class="btn-add">
                         <i class="fas fa-plus"></i> Thêm điểm mới
@@ -1045,6 +1106,65 @@ class TeacherScores {
                 this.filterStudentsByCohort(cohortId);
             });
         }
+    }
+
+    ensureFilterElements() {
+        console.log('Kiểm tra và tạo các phần tử lọc...');
+        
+        // Kiểm tra container chính
+        let actionsContainer = document.querySelector('.score-actions');
+        if (!actionsContainer) {
+            console.log('Tạo container .score-actions');
+            actionsContainer = document.createElement('div');
+            actionsContainer.className = 'score-actions';
+            
+            // Tìm vị trí thích hợp để chèn container
+            const scoresContent = document.querySelector('.scores-content');
+            if (scoresContent) {
+                scoresContent.insertBefore(actionsContainer, scoresContent.firstChild);
+            } else {
+                console.error('Không tìm thấy .scores-content');
+                return;
+            }
+        }
+        
+        // Kiểm tra và tạo các phần tử lọc
+        const filterSection = document.querySelector('.filter-section');
+        if (!filterSection) {
+            console.log('Tạo filter-section');
+            const newFilterSection = document.createElement('div');
+            newFilterSection.className = 'filter-section';
+            newFilterSection.innerHTML = `
+                <div class="filter-item">
+                    <label for="classFilter">Lớp học</label>
+                    <select id="classFilter" class="filter-select">
+                        <option value="">Tất cả lớp</option>
+                    </select>
+                </div>
+                
+                <div class="filter-item">
+                    <label for="subjectFilter">Môn học</label>
+                    <select id="subjectFilter" class="filter-select">
+                        <option value="">Tất cả môn</option>
+                    </select>
+                </div>
+                
+                <div class="filter-item">
+                    <label for="studentSearch">Tìm kiếm học sinh</label>
+                    <input type="text" id="studentSearch" class="filter-select" placeholder="Nhập tên học sinh...">
+                </div>
+                
+                <div class="filter-item">
+                    <label>&nbsp;</label>
+                    <button id="addScoreBtn" class="btn-add">
+                        <i class="fas fa-plus"></i> Thêm điểm mới
+                    </button>
+                </div>
+            `;
+            actionsContainer.appendChild(newFilterSection);
+        }
+        
+        console.log('Đã kiểm tra và tạo xong các phần tử lọc');
     }
 }
 

@@ -230,26 +230,44 @@ class TeacherScores {
 
     applyFilters() {
         try {
-            // Kiểm tra sự tồn tại của các phần tử lọc
-            const classFilter = document.getElementById('classFilter');
-            const subjectFilter = document.getElementById('subjectFilter');
-            const studentSearch = document.getElementById('studentSearch');
-            
-            if (!classFilter || !subjectFilter || !studentSearch) {
-                console.error('Không tìm thấy các phần tử lọc');
-                return;
-            }
-            
-            const cohortId = classFilter.value;
-            const subjectId = subjectFilter.value;
-            const searchText = studentSearch.value.toLowerCase();
-            
-            console.log('Áp dụng bộ lọc:', { cohortId, subjectId, searchText });
+            console.log('Đang áp dụng bộ lọc...');
             
             // Kiểm tra dữ liệu cần thiết
             if (!this.allScores || !this.allStudents) {
                 console.error('Chưa có dữ liệu để lọc');
                 return;
+            }
+            
+            // Lấy các phần tử lọc (có thể không tồn tại)
+            const classFilter = document.getElementById('classFilter');
+            const subjectFilter = document.getElementById('subjectFilter');
+            const testTypeFilter = document.getElementById('testTypeFilter');
+            const studentSearch = document.getElementById('studentSearch');
+            
+            // Lấy giá trị từ các phần tử lọc nếu tồn tại
+            const cohortId = classFilter ? classFilter.value : '';
+            const subjectId = subjectFilter ? subjectFilter.value : '';
+            const testType = testTypeFilter ? testTypeFilter.value : '';
+            const searchText = studentSearch ? studentSearch.value.toLowerCase() : '';
+            
+            console.log('Áp dụng bộ lọc:', { cohortId, subjectId, testType, searchText });
+            
+            // Debug: In ra thông tin chi tiết về dữ liệu
+            console.log('Tổng số điểm:', this.allScores.length);
+            console.log('Tổng số học sinh:', this.allStudents.length);
+            
+            // In ra một số mẫu điểm để kiểm tra cấu trúc dữ liệu
+            if (this.allScores.length > 0) {
+                console.log('Mẫu điểm đầu tiên:', this.allScores[0]);
+                
+                // Kiểm tra tất cả các ID môn học trong dữ liệu
+                const subjectIdsInData = [...new Set(this.allScores.map(score => score.subjectID))];
+                console.log('Tất cả subjectID trong dữ liệu:', subjectIdsInData);
+                
+                // Kiểm tra giá trị đã chọn
+                if (subjectId) {
+                    console.log('subjectId đã chọn:', subjectId);
+                }
             }
             
             // Lọc điểm dựa trên các điều kiện
@@ -261,11 +279,50 @@ class TeacherScores {
                     const student = this.allStudents.find(s => s.studentID === score.studentID);
                     return student && student.cohortID === cohortId;
                 });
+                console.log('Sau khi lọc lớp:', filteredScores.length);
             }
             
             // Lọc theo môn học nếu có chọn môn
             if (subjectId) {
-                filteredScores = filteredScores.filter(score => score.subjectID === subjectId);
+                // Trước tiên, thử lọc theo subjectID
+                filteredScores = filteredScores.filter(score => {
+                    // Kiểm tra giá trị có trong data không
+                    if (!score.subjectID && score.subjectId) {
+                        // Trường hợp API trả về subjectId thay vì subjectID
+                        return score.subjectId === subjectId;
+                    }
+                    
+                    // So sánh chuỗi thông thường
+                    return score.subjectID === subjectId;
+                });
+                console.log('Sau khi lọc môn học theo ID:', filteredScores.length);
+                
+                // Nếu không có kết quả, thử lọc theo tên môn học
+                if (filteredScores.length === 0) {
+                    console.log('Không tìm được kết quả khi lọc theo ID, thử lọc theo tên môn học...');
+                    
+                    // Tìm tên môn học tương ứng với ID đã chọn
+                    const selectedSubjectElement = subjectFilter.querySelector(`option[value="${subjectId}"]`);
+                    if (selectedSubjectElement) {
+                        const subjectName = selectedSubjectElement.textContent.trim();
+                        console.log('Lọc theo tên môn học:', subjectName);
+                        
+                        // Lọc lại toàn bộ điểm theo tên môn học
+                        filteredScores = [...this.allScores].filter(score => {
+                            return score.subjectName && score.subjectName.trim() === subjectName;
+                        });
+                        
+                        console.log('Sau khi lọc môn học theo tên:', filteredScores.length);
+                    }
+                }
+            }
+            
+            // Lọc theo loại điểm nếu có chọn loại
+            if (testType) {
+                filteredScores = filteredScores.filter(score => {
+                    return score.testType === testType;
+                });
+                console.log('Sau khi lọc loại điểm:', filteredScores.length);
             }
             
             // Lọc theo tên học sinh nếu có nhập tên
@@ -274,6 +331,7 @@ class TeacherScores {
                     const student = this.allStudents.find(s => s.studentID === score.studentID);
                     return student && student.studentName.toLowerCase().includes(searchText);
                 });
+                console.log('Sau khi lọc tên học sinh:', filteredScores.length);
             }
             
             console.log('Số lượng điểm sau khi lọc:', filteredScores.length);

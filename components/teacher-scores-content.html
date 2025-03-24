@@ -23,8 +23,13 @@
                 <input type="text" id="studentSearch" class="filter-select" placeholder="Nhập tên học sinh...">
             </div>
             <div class="filter-item">
-                <label for="testType">Lọc theo loại điểm</label>
-                <input type="text" id="testType" class="filter-select"placeholder="Chọn loại điểm"> 
+                <label for="testTypeFilter">Loại điểm</label>
+                <select id="testTypeFilter" class="filter-select">
+                    <option value="">Tất cả loại điểm</option>
+                    <option value="Final">Cuối kì</option>
+                    <option value="MidTerm">Giữa kì</option>
+                    <option value="Component Score">Miệng</option>
+                </select>
             </div>
             
             <div class="filter-item">

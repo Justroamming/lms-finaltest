@@ -79,6 +79,12 @@ class TeacherScores {
             subjectFilter.addEventListener('change', () => this.applyFilters());
         }
         
+        // Lắng nghe sự kiện cho bộ lọc loại điểm
+        const testTypeFilter = document.getElementById('testTypeFilter');
+        if (testTypeFilter) {
+            testTypeFilter.addEventListener('change', () => this.applyFilters());
+        }
+        
         // Lắng nghe sự kiện cho trường tìm kiếm học sinh
         const studentSearch = document.getElementById('studentSearch');
         if (studentSearch) {
@@ -1046,12 +1052,10 @@ class TeacherScores {
                                 <div class="form-group">
                                     <label for="testType">Loại điểm</label>
                                     <select id="testType" name="testType" required>
-                                        <option value="">Chọn loại điểm</option>
-                                        <option value="Miệng">Miệng</option>
-                                        <option value="15 phút">15 phút</option>
-                                        <option value="1 tiết">1 tiết</option>
-                                        <option value="Giữa kỳ">Giữa kỳ</option>
-                                        <option value="Cuối kỳ">Cuối kỳ</option>
+                                        <option value="">Tất cả loại điểm</option>
+                                        <option value="Final">Cuối kì</option>
+                                        <option value="MidTerm">Giữa kì</option>
+                                        <option value="Component Score">Miệng</option>
                                     </select>
                                 </div>
                                 
@@ -1138,6 +1142,16 @@ class TeacherScores {
                 </div>
                 
                 <div class="filter-item">
+                    <label for="testTypeFilter">Loại điểm</label>
+                    <select id="testTypeFilter" class="filter-select">
+                        <option value="">Tất cả loại điểm</option>
+                        <option value="Final">Cuối kì</option>
+                        <option value="MidTerm">Giữa kì</option>
+                        <option value="Component Score">Miệng</option>
+                    </select>
+                </div>
+                
+                <div class="filter-item">
                     <label for="studentSearch">Tìm kiếm học sinh</label>
                     <input type="text" id="studentSearch" class="filter-select" placeholder="Nhập tên học sinh...">
                 </div>
@@ -1163,6 +1177,17 @@ class TeacherScores {
                 const cohortId = classFilter.value;
                 this.filterStudentsByCohort(cohortId);
             });
+        }
+        
+        // Gắn sự kiện cho bộ lọc loại điểm và tìm kiếm học sinh
+        const testTypeFilter = document.getElementById('testTypeFilter');
+        if (testTypeFilter) {
+            testTypeFilter.addEventListener('change', () => this.applyFilters());
+        }
+        
+        const studentSearch = document.getElementById('studentSearch');
+        if (studentSearch) {
+            studentSearch.addEventListener('input', () => this.applyFilters());
         }
     }
 
@@ -1204,6 +1229,16 @@ class TeacherScores {
                     <label for="subjectFilter">Môn học</label>
                     <select id="subjectFilter" class="filter-select">
                         <option value="">Tất cả môn</option>
+                    </select>
+                </div>
+                
+                <div class="filter-item">
+                    <label for="testTypeFilter">Loại điểm</label>
+                    <select id="testTypeFilter" class="filter-select">
+                        <option value="">Tất cả loại điểm</option>
+                        <option value="Final">Cuối kì</option>
+                        <option value="MidTerm">Giữa kì</option>
+                        <option value="Component Score">Miệng</option>
                     </select>
                 </div>
                 

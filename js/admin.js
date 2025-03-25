@@ -1,5 +1,6 @@
 class AdminDashboard {
     constructor() {
+        this.token=localStorage.getItem('token');
         this.currentPage = 'dashboard';
         this.pageContent = document.getElementById('pageContent');
         this.initializeNavigation();
@@ -174,13 +175,25 @@ class AdminDashboard {
     async initializeStudentDistributionChart() {
         try {
             // Lấy dữ liệu lớp học và số lượng học sinh
-            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts');
+            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const cohortsData = await cohortsResponse.json();
             const cohorts = cohortsData.data || [];
 
             // Lấy số lượng học sinh cho mỗi lớp
             const studentCounts = await Promise.all(cohorts.map(async (cohort) => {
-                const response = await fetch(`https://localhost:7231/RealAdmins/GetNumOfStudentsInACohort?id=${cohort.cohortId}`);
+                const response = await fetch(`https://localhost:7231/RealAdmins/GetNumOfStudentsInACohort?id=${cohort.cohortId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${this.token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
                 const data = await response.json();
                 return data[0]?.numOfStudents || 0;
             }));
@@ -260,7 +273,13 @@ class AdminDashboard {
     async updateQuickStats() {
         try {
             // Lấy tất cả học sinh
-            const studentsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllStudents');
+            const studentsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllStudents', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const studentsData = await studentsResponse.json(); // Đã sửa từ response thành studentsResponse
             const students = studentsData.data || [];
 
@@ -286,13 +305,25 @@ class AdminDashboard {
             }
 
             // Lấy thông tin về lớp học
-            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts');
+            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const cohortsData = await cohortsResponse.json();
             const cohorts = cohortsData.data || [];
 
             // Lấy số lượng học sinh cho mỗi lớp
             const cohortStats = await Promise.all(cohorts.map(async (cohort) => {
-                const response = await fetch(`https://localhost:7231/RealAdmins/GetNumOfStudentsInACohort?id=${cohort.cohortId}`);
+                const response = await fetch(`https://localhost:7231/RealAdmins/GetNumOfStudentsInACohort?id=${cohort.cohortId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${this.token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
                 const data = await response.json();
                 return {
                     name: cohort.cohortName,
@@ -346,7 +377,13 @@ class AdminDashboard {
     }
 
     async loadCohortsForSelect() {
-        const response = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts');
+        const response = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${this.token}`,
+                'Content-Type': 'application/json'
+            }
+        });
         const data = await response.json();
         const cohorts = data.data || [];
     
@@ -358,7 +395,13 @@ class AdminDashboard {
     
     async loadStudents() {
         try {
-            const response = await fetch('https://localhost:7231/RealAdmins/GetAllStudents');
+            const response = await fetch('https://localhost:7231/RealAdmins/GetAllStudents', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -370,7 +413,13 @@ class AdminDashboard {
     
             console.log("Parsed students:", students); 
     
-            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts');
+            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const cohortsData = await cohortsResponse.json();
             const cohorts = cohortsData.data; 
             console.log("API Cohorts Response:", cohorts); 
@@ -535,7 +584,13 @@ class AdminDashboard {
                     this.showNotification('info', 'Đang tải dữ liệu', 'Vui lòng đợi trong giây lát...', null);
                     
                     // Gọi API để lấy thông tin học sinh
-                    const response = await fetch(`https://localhost:7231/RealAdmins/GetStudentById?id=${studentId}`);
+                    const response = await fetch(`https://localhost:7231/RealAdmins/GetStudentById?id=${studentId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${this.token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
                     
                     // Ẩn thông báo đang tải
                     this.hideNotification();
@@ -752,7 +807,13 @@ class AdminDashboard {
 
     async loadTeachers() {
         try {
-            const response = await fetch('https://localhost:7231/RealAdmins/GetAllTeacher');
+            const response = await fetch('https://localhost:7231/RealAdmins/GetAllTeacher', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -882,7 +943,13 @@ class AdminDashboard {
                     this.showNotification('info', 'Đang tải dữ liệu', 'Vui lòng đợi trong giây lát...', null);
                     
                     // Gọi API để lấy thông tin giáo viên
-                    const response = await fetch(`https://localhost:7231/RealAdmins/GetTeacherById?id=${teacherId}`);
+                    const response = await fetch(`https://localhost:7231/RealAdmins/GetTeacherById?id=${teacherId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${this.token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
                     
                     // Ẩn thông báo đang tải
                     this.hideNotification();
@@ -1056,7 +1123,13 @@ class AdminDashboard {
 
     async loadCohorts() {
         try {
-            const response = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts');
+            const response = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const data = await response.json();
             console.log("API Cohorts Response:", data);
     
@@ -1070,7 +1143,13 @@ class AdminDashboard {
             // Get student counts for each cohort
             const studentCounts = await Promise.all(cohorts.map(async (co) => {
                 try {
-                    const res = await fetch(`https://localhost:7231/RealAdmins/GetNumOfStudentsInACohort?id=${co.cohortId}`);
+                    const res = await fetch(`https://localhost:7231/RealAdmins/GetNumOfStudentsInACohort?id=${co.cohortId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${this.token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
                     const countData = await res.json();
                     
                     if (Array.isArray(countData) && countData.length > 0) {
@@ -1114,7 +1193,13 @@ class AdminDashboard {
 
     async printStudentInfo(cohortId) {
         try {
-            const res = await fetch(`https://localhost:7231/RealAdmins/GetStudentsInCohort?id=${cohortId}`);
+            const res = await fetch(`https://localhost:7231/RealAdmins/GetStudentsInCohort?id=${cohortId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const students = await res.json();
     
             if (!Array.isArray(students) || students.length === 0) {
@@ -1281,7 +1366,13 @@ class AdminDashboard {
                     this.showNotification('info', 'Đang tải dữ liệu', 'Vui lòng đợi trong giây lát...', null);
                     
                     // Gọi API để lấy thông tin lớp học
-                    const response = await fetch(`https://localhost:7231/RealAdmins/GetCohortById?id=${cohortId}`);
+                    const response = await fetch(`https://localhost:7231/RealAdmins/GetCohortById?id=${cohortId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${this.token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
                     
                     // Ẩn thông báo đang tải
                     this.hideNotification();
@@ -1399,7 +1490,9 @@ class AdminDashboard {
 
         const response = await fetch(url, {
             method,
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 
+                'Authorization': `Bearer ${this.token}`,
+                'Content-Type': 'application/json' }
         });
 
         if (!response.ok) throw new Error(`Failed to ${isUpdating ? "update" : "create"} cohort`);
@@ -1440,6 +1533,7 @@ class AdminDashboard {
         const response = await fetch(`https://localhost:7231/RealAdmins/DeleteCohort?id=${cohortId}`, {
             method: 'DELETE',
             headers: {
+                'Authorization': `Bearer ${this.token}`,
                 'Content-Type': 'application/json'
             }
         });
@@ -1460,7 +1554,13 @@ class AdminDashboard {
 
     async loadSubjects() {
         try {
-            const response = await fetch('https://localhost:7231/RealAdmins/GetAllSubjects');
+            const response = await fetch('https://localhost:7231/RealAdmins/GetAllSubjects', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const data = await response.json();
             console.log("API Subjects Response:", data);
     
@@ -1622,7 +1722,9 @@ class AdminDashboard {
 
         const response = await fetch(url, {
             method,
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 
+                'Authorization': `Bearer ${this.token}`,
+                'Content-Type': 'application/json' }
         });
 
         if (!response.ok) throw new Error(`Lỗi ${isUpdating ? "cập nhật" : "tạo mới"} môn học: ${response.status}`);
@@ -1659,6 +1761,7 @@ class AdminDashboard {
         const response = await fetch(`https://localhost:7231/RealAdmins/DeleteASubject?id=${subjectId}`, {
             method: 'DELETE',
             headers: {
+                'Authorization': `Bearer ${this.token}`,
                 'Content-Type': 'application/json'
             }
         });
@@ -1711,7 +1814,13 @@ class AdminDashboard {
 
     async loadAssignments() {
         try {
-            const response = await fetch('https://localhost:7231/RealAdmins/GetAllTeacherSchedule');
+            const response = await fetch('https://localhost:7231/RealAdmins/GetAllTeacherSchedule', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -1719,17 +1828,35 @@ class AdminDashboard {
             const assignments = data || [];
 
             // Lấy thông tin giáo viên
-            const teachersResponse = await fetch('https://localhost:7231/RealAdmins/GetAllTeacher');
+            const teachersResponse = await fetch('https://localhost:7231/RealAdmins/GetAllTeacher', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const teachersData = await teachersResponse.json();
             const teachers = teachersData.data || [];
 
             // Lấy thông tin môn học
-            const subjectsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllSubjects');
+            const subjectsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllSubjects', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const subjectsData = await subjectsResponse.json();
             const subjects = subjectsData.data || [];
 
             // Lấy thông tin lớp học
-            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts');
+            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const cohortsData = await cohortsResponse.json();
             const cohorts = cohortsData.data || [];
 
@@ -1782,7 +1909,13 @@ class AdminDashboard {
     async loadAssignmentFormData() {
         try {
             // Load danh sách giáo viên
-            const teachersResponse = await fetch('https://localhost:7231/RealAdmins/GetAllTeacher');
+            const teachersResponse = await fetch('https://localhost:7231/RealAdmins/GetAllTeacher', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const teachersData = await teachersResponse.json();
             const teachers = teachersData.data || [];
             
@@ -1792,7 +1925,13 @@ class AdminDashboard {
             ).join('');
 
             // Load danh sách môn học
-            const subjectsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllSubjects');
+            const subjectsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllSubjects', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const subjectsData = await subjectsResponse.json();
             const subjects = subjectsData.data || [];
             
@@ -1802,7 +1941,13 @@ class AdminDashboard {
             ).join('');
 
             // Load danh sách lớp học
-            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts');
+            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const cohortsData = await cohortsResponse.json();
             const cohorts = cohortsData.data || [];
             
@@ -1859,7 +2004,13 @@ class AdminDashboard {
         console.log("Date input fields in form:", Array.from(dateInputs).map(el => el.name));
         
         if (lessonClassId) {
-            const response = await fetch(`https://localhost:7231/RealAdmins/GetLessonSchedulebyID?id=${lessonClassId}`);
+            const response = await fetch(`https://localhost:7231/RealAdmins/GetLessonSchedulebyID?id=${lessonClassId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const assignmentArray = await response.json();
             const assignment = assignmentArray[0]; // Access the first item in the array
             console.log("Raw assignment data:", assignment);
@@ -1945,7 +2096,9 @@ class AdminDashboard {
         try {
             const response = await fetch(url, {
                 method,
-                headers: { 'Content-Type': 'application/json' }
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json' }
             });
     
             if (!response.ok) throw new Error(`Failed to ${isUpdating ? "update" : "create"} assignment`);
@@ -1966,7 +2119,10 @@ class AdminDashboard {
                 async () => {
         try {
             const response = await fetch(`https://localhost:7231/RealAdmins/DeleteAssignedTeacher?lessonClassID=${lessonClassId}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json' }
             });
 
             if (!response.ok) throw new Error('Failed to delete assignment');
@@ -2017,13 +2173,31 @@ class AdminDashboard {
     }
 
     async loadAccounts() {
-        const teachersResponse = await fetch('https://localhost:7231/Teacher/GetAllTeacher');
+        const teachersResponse = await fetch('https://localhost:7231/Teacher/GetAllTeacher', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${this.token}`,
+                'Content-Type': 'application/json'
+            }
+        });
         const teachersData = await teachersResponse.json();
         const teachers = teachersData.data || [];
-        const studentsResponse = await fetch('https://localhost:7231/Student/GetAllStudents');
+        const studentsResponse = await fetch('https://localhost:7231/Student/GetAllStudents', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${this.token}`,
+                'Content-Type': 'application/json'
+            }
+        });
         const studentsData = await studentsResponse.json();
         const students = studentsData.data || [];
-        const adminsResponse = await fetch('https://localhost:7231/Admin/GetAllAdmins');
+        const adminsResponse = await fetch('https://localhost:7231/Admin/GetAllAdmins', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${this.token}`,
+                'Content-Type': 'application/json'
+            }
+        });
         const adminsData = await adminsResponse.json();
         const admins = adminsData.data || [];
         
@@ -2056,15 +2230,33 @@ class AdminDashboard {
     async  getSystemStats() {   
         try {
             // Lấy dữ liệu hiện tại
-            const studentsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllStudents');
+            const studentsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllStudents', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const studentsData = await studentsResponse.json();
             const students = studentsData.data || [];
             
-            const teachersResponse = await fetch('https://localhost:7231/RealAdmins/GetAllTeacher');
+            const teachersResponse = await fetch('https://localhost:7231/RealAdmins/GetAllTeacher', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const teachersData = await teachersResponse.json();
             const teachers = teachersData.data || [];
 
-            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts');
+            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const cohortsData = await cohortsResponse.json();
             const cohorts = cohortsData.data || [];
 
@@ -2370,6 +2562,7 @@ class AdminDashboard {
         const response = await fetch(`https://localhost:7231/RealAdmins/DeleteTeacher?id=${teacherId}`, {
             method: 'DELETE',
             headers: {
+                'Authorization': `Bearer ${this.token}`,
                 'Content-Type': 'application/json'
             }
         });
@@ -2611,7 +2804,9 @@ class AdminDashboard {
 
         const response = await fetch(url, {
             method,
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 
+                'Authorization': `Bearer ${this.token}`,
+                'Content-Type': 'application/json' }
         });
 
         if (!response.ok) throw new Error(`Failed to ${isUpdating ? "update" : "create"} student`);
@@ -2629,6 +2824,7 @@ class AdminDashboard {
             const response = await fetch(url, {
             method: 'DELETE',
             headers: {
+                'Authorization': `Bearer ${this.token}`,
                 'Content-Type': 'application/json'
             }
         });
@@ -2683,7 +2879,9 @@ class AdminDashboard {
 
         const response = await fetch(url, {
             method,
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 
+                'Authorization': `Bearer ${this.token}`,
+                'Content-Type': 'application/json' }
         });
 
         if (!response.ok) throw new Error(`Failed to ${isUpdating ? "update" : "create"} teacher`);
@@ -2696,6 +2894,7 @@ class AdminDashboard {
         const response = await fetch(`https://localhost:7231/RealAdmins/DeleteTeacher?id=${teacherId}`, {
             method: 'DELETE',
             headers: {
+                'Authorization': `Bearer ${this.token}`,
                 'Content-Type': 'application/json'
             }
         });

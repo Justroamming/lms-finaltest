@@ -307,13 +307,13 @@
         </div>
     </div>
 
-    <script src="js/auth.js"></script>
+    <script src="js/login.js"></script>
     <script src="js/admin.js"></script>
     <script>
         // Kiểm tra quyền admin
         document.addEventListener('DOMContentLoaded', () => {
             const user = getCurrentUser();
-            if (!user || user.role !== 'admin') {
+            if (!user || !checkAuth('Admin')) {
                 window.location.href = 'login.html';
             }
             

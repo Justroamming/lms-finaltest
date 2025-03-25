@@ -148,7 +148,7 @@
         </main>
     </div>
 
-    <script src="js/auth.js"></script>
+    <script src="js/login.js"></script>
     <script src="js/base-component.js"></script>
     <script src="js/student-dashboard.js"></script>
     <script src="js/student-scores.js"></script>
@@ -158,7 +158,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const user = getCurrentUser();
-            if (!user || user.role !== 'student') {
+            if (!user || !checkAuth('Student')) {
                 window.location.href = 'login.html';
             }
             

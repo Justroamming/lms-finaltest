@@ -25,12 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (currentUser.role === 'Student') {
                         window.location.href = 'student-dashboard.html';
                     }
-                } else {
-                    alert('Email hoặc mật khẩu không đúng!');
                 }
             } catch (error) {
                 console.error('Error during login:', error);
-                alert('Đã xảy ra lỗi, vui lòng thử lại sau!');
             }
         });
     } else {

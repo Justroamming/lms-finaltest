@@ -1,5 +1,6 @@
 class TeacherDashboard {
     constructor() {
+        this.token= localStorage.getItem('token');
         const currentUser = sessionStorage.getItem('currentUser');
         this.teacher = JSON.parse(currentUser);
         this.initializeDashboard();
@@ -8,7 +9,13 @@ class TeacherDashboard {
     async initializeDashboard() {
         try {
             // Fetch teacher data from API
-            const response = await fetch(`https://localhost:7231/DashboardTeachers/GetTeacherById?id=${this.teacher.teacherId}`);
+            const response = await fetch(`https://localhost:7231/DashboardTeachers/GetTeacherById?id=${this.teacher.teacherId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const teacher = await response.json();
             const teacherData = teacher.data;
             
@@ -40,7 +47,13 @@ class TeacherDashboard {
     async updateDashboardView() {
    
         try {
-            const totalStudentsResponse = await fetch(`https://localhost:7231/DashboardTeachers/GetTotalStudentsByTeacher?id=${this.teacher.teacherId}`);
+            const totalStudentsResponse = await fetch(`https://localhost:7231/DashboardTeachers/GetTotalStudentsByTeacher?id=${this.teacher.teacherId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const totalStudentsData = await totalStudentsResponse.json();
             
             const totalStudentsElement = document.getElementById('totalStudents');
@@ -56,7 +69,13 @@ class TeacherDashboard {
         
 
         try {
-            const AverageScoreResponse = await fetch(`https://localhost:7231/DashboardTeachers/GetAverageScoreByTeacher?id=${this.teacher.teacherId}`);
+            const AverageScoreResponse = await fetch(`https://localhost:7231/DashboardTeachers/GetAverageScoreByTeacher?id=${this.teacher.teacherId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const AverageScoreData = await AverageScoreResponse.json();
             const averageElement = document.getElementById('averageScore');
         
@@ -97,7 +116,13 @@ class TeacherDashboard {
 
     async updateSchedule() {
         try {
-            const response = await fetch(`https://localhost:7231/ScheduleTeachers/GetOneTeacherSchedule?id=${this.teacher.teacherId}`);
+            const response = await fetch(`https://localhost:7231/ScheduleTeachers/GetOneTeacherSchedule?id=${this.teacher.teacherId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const schedule = await response.json();
 
             const scheduleContainer = document.getElementById('todaySchedule');

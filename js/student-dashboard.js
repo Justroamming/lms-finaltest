@@ -1,5 +1,6 @@
 class StudentDashboard {
      constructor() {
+        this.token= localStorage.getItem('token');
         this.student = null; // Lưu thông tin học sinh
         this.fetchStudentData();
     }
@@ -10,7 +11,13 @@ class StudentDashboard {
             const studentId = currentUser ? JSON.parse(currentUser).studentId : null;
             if (!studentId) throw new Error('Không tìm thấy ID học sinh');
 
-            const response = await fetch(`https://localhost:7231/DashboardStudents/GetStudentById?id=${studentId}`);
+            const response = await fetch(`https://localhost:7231/DashboardStudents/GetStudentById?id=${studentId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             if (!response.ok) throw new Error('Lỗi khi lấy dữ liệu học sinh');
 
             const result = await response.json();
@@ -73,7 +80,13 @@ class StudentDashboard {
     
         try {
             // Fetch overall stats
-            const response = await fetch(`https://localhost:7231/DashboardStudents/GetStudentOverallAverageScore?id=${this.student.studentId}`);
+            const response = await fetch(`https://localhost:7231/DashboardStudents/GetStudentOverallAverageScore?id=${this.student.studentId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             if (!response.ok) throw new Error('Lỗi khi tải thống kê');
     
             const statsArray = await response.json();
@@ -89,7 +102,13 @@ class StudentDashboard {
                 stats.overallAverageScore ? parseFloat(stats.overallAverageScore).toFixed(2) : '0.00';
     
             // Fetch future test dates
-            const testResponse = await fetch(`https://localhost:7231/DashboardStudents/GetFutureTestsOfAStudent?id=${this.student.studentId}`);
+            const testResponse = await fetch(`https://localhost:7231/DashboardStudents/GetFutureTestsOfAStudent?id=${this.student.studentId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             if (!testResponse.ok) throw new Error('Lỗi khi tải ngày kiểm tra');
     
             const tests = await testResponse.json();
@@ -138,7 +157,13 @@ class StudentDashboard {
         }
 
         try {
-            const response = await fetch(`https://localhost:7231/DashboardStudents/GetAllGradesOfAStudent?id=${this.student.studentId}`);
+            const response = await fetch(`https://localhost:7231/DashboardStudents/GetAllGradesOfAStudent?id=${this.student.studentId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             if (!response.ok) throw new Error('Lỗi khi tải điểm số');
 
             const scores = await response.json();
@@ -170,7 +195,13 @@ class StudentDashboard {
 
     async loadUpcomingExams() {
         try {
-            const response = await fetch(`https://localhost:7231/DashboardStudents/GetFutureTestsOfAStudent?id=${this.student.studentId}`);
+            const response = await fetch(`https://localhost:7231/DashboardStudents/GetFutureTestsOfAStudent?id=${this.student.studentId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             if (!response.ok) {
                 throw new Error('Failed to fetch upcoming exams');
             }
@@ -201,36 +232,6 @@ class StudentDashboard {
             console.error('Lỗi khi tải kỳ thi sắp tới:', error);
         }
     }
-
-   /* async loadSubjectProgress() {
-        try {
-            const response = await fetch(`/api/student/${this.student.studentId}/progress`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch subject progress');
-            }
-            const progress = await response.json();
-            
-            const progressGrid = document.getElementById('subjectProgress');
-            if (!progressGrid) return;
-
-            progressGrid.innerHTML = progress.map(subject => `
-                <div class="progress-item">
-                    <div class="subject-info">
-                        <h4>${subject.subject}</h4>
-                        <span class="progress-text">${subject.completed}/${subject.total} cột điểm</span>
-                    </div>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar" style="width: ${subject.percentage}%"></div>
-                    </div>
-                    <div class="subject-average">
-                        TB: <span class="${subject.average >= 5 ? 'pass' : 'fail'}">${subject.average}</span>
-                    </div>
-                </div>
-            `).join('');
-        } catch (error) {
-            console.error('Lỗi khi tải tiến độ môn học:', error);
-        }
-    }*/
 
     getScoreRating(score) {
         if (score >= 8.5) return 'Giỏi';

@@ -1,5 +1,6 @@
 class TeacherScores {
     constructor() {
+        this.token= localStorage.getItem('token');
         this.apiBaseUrl = 'https://localhost:7231/ScoreTeachers'; // URL cơ sở API
         
         try {
@@ -100,7 +101,13 @@ class TeacherScores {
             console.log('Đang tải danh sách lớp học...');
             
             // Tải danh sách lớp học
-            const response = await fetch(`${this.apiBaseUrl}/GetAllCohortteachbyateacher?id=${this.teacher.teacherId}`);
+            const response = await fetch(`${this.apiBaseUrl}/GetAllCohortteachbyateacher?id=${this.teacher.teacherId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -125,7 +132,13 @@ class TeacherScores {
             
             // Tải danh sách môn học
             console.log('Đang tải danh sách môn học...');
-            const subjectResponse = await fetch(`${this.apiBaseUrl}/GetTeacherAllSubjectsTeach?id=${this.teacher.teacherId}`);
+            const subjectResponse = await fetch(`${this.apiBaseUrl}/GetTeacherAllSubjectsTeach?id=${this.teacher.teacherId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             if (!subjectResponse.ok) {
                 throw new Error(`HTTP error! Status: ${subjectResponse.status}`);
             }
@@ -187,7 +200,13 @@ class TeacherScores {
             
             // Tải danh sách điểm
             console.log('Tải điểm số cho giáo viên ID:', this.teacher.teacherId);
-            const response = await fetch(`${this.apiBaseUrl}/GetTeacherAllStudentGrades?id=${this.teacher.teacherId}`);
+            const response = await fetch(`${this.apiBaseUrl}/GetTeacherAllStudentGrades?id=${this.teacher.teacherId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -197,7 +216,13 @@ class TeacherScores {
             
             // Tải danh sách học sinh
             console.log('Tải danh sách học sinh cho giáo viên ID:', this.teacher.teacherId);
-            const studentsResponse = await fetch(`${this.apiBaseUrl}/GetTeacherAllTeachStudentsByCohort?id=${this.teacher.teacherId}`);
+            const studentsResponse = await fetch(`${this.apiBaseUrl}/GetTeacherAllTeachStudentsByCohort?id=${this.teacher.teacherId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             if (!studentsResponse.ok) {
                 throw new Error(`HTTP error! Status: ${studentsResponse.status}`);
             }
@@ -485,7 +510,13 @@ class TeacherScores {
                 
                 console.log('Gửi yêu cầu tới API để lấy thông tin điểm:', url);
                 
-                const response = await fetch(url);
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${this.token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
@@ -609,7 +640,9 @@ class TeacherScores {
             
             const response = await fetch(url, {
                 method: isUpdating ? 'PUT' : 'POST',
-                headers: { 'Content-Type': 'application/json' }
+                headers: { 
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json' }
             });
             
             if (!response.ok) {
@@ -660,7 +693,11 @@ class TeacherScores {
                         console.log('Gửi yêu cầu tới API:', url);
                         
                         const response = await fetch(url, {
-                            method: 'DELETE'
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${this.token}`,
+                                'Content-Type': 'application/json'
+                            }
                         });
                         
                         if (!response.ok) {
@@ -698,7 +735,11 @@ class TeacherScores {
             if (window.confirm('Bạn có chắc chắn muốn xóa điểm này? Hành động này không thể hoàn tác.')) {
                 try {
                     const response = await fetch(`${this.apiBaseUrl}/DeleteAStudentGradeByTeacher?gradeID=${gradeID}`, {
-                        method: 'DELETE'
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${this.token}`,
+                            'Content-Type': 'application/json'
+                        }
                     });
                     
                     if (!response.ok) {
@@ -737,7 +778,13 @@ class TeacherScores {
             }
             
             // Gọi API để lấy danh sách học sinh
-            const response = await fetch(`${this.apiBaseUrl}/GetTeacherAllTeachStudentsByCohort?id=${this.teacher.teacherId}`);
+            const response = await fetch(`${this.apiBaseUrl}/GetTeacherAllTeachStudentsByCohort?id=${this.teacher.teacherId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }

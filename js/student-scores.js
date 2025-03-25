@@ -1,5 +1,6 @@
 class StudentScores {
     constructor() {
+        this.token=localStorage.getItem('token');
         const currentUser = sessionStorage.getItem('currentUser');
         // Store the entire user object
         this.student = JSON.parse(currentUser);
@@ -78,7 +79,13 @@ class StudentScores {
     async loadScores() {
         try {
             // Note: Adjust the URL if needed based on your API endpoint.
-            const response = await fetch(`https://localhost:7231/ScoreStudentss/GetAllGradesOfAStudent?id=${this.student.studentId}`);
+            const response = await fetch(`https://localhost:7231/ScoreStudentss/GetAllGradesOfAStudent?id=${this.student.studentId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             const scores = await response.json();
             this.allScores = scores;
 

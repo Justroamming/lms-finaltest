@@ -1,6 +1,6 @@
 class TeacherProfile  {
     constructor() {
-       
+        this.token=localStorage.getItem('token');
         this.teacher = JSON.parse(sessionStorage.getItem('currentUser'));
     
         if (!this.teacher) {
@@ -154,6 +154,7 @@ class TeacherProfile  {
             const response = await fetch(`https://localhost:7231/ProfileTeachers/UpdateTeacherPassword?id=${this.teacher.teacherId || ""}&password=${confirmPassword}`, {
                 method: 'PUT',
                 headers: {
+                    'Authorization': `Bearer ${this.token}`,
                     'Content-Type': 'application/json'
                 },
             });
@@ -261,7 +262,13 @@ class TeacherProfile  {
    
 
     async validatePassword(current, newPass, confirm) {
-        const teacherresponse = await fetch(`https://localhost:7231/ProfileTeachers/GetTeacherById?id=${this.teacher.teacherId}`);
+        const teacherresponse = await fetch(`https://localhost:7231/ProfileTeachers/GetTeacherById?id=${this.teacher.teacherId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${this.token}`,
+                'Content-Type': 'application/json'
+            }
+        });
         const teacher = await teacherresponse.json();
         const teacherdata=teacher.data
         if (current !== teacherdata.password) {
@@ -320,7 +327,7 @@ class TeacherProfile  {
 
 document.addEventListener('DOMContentLoaded', async () => {
     const user = getCurrentUser();
-    if (!user || user.role !== 'teacher') {
+    if (!user || !checkAuth('Teacher')) {
         window.location.href = 'login.html';
     }
     window.navigationInstance = new TeacherNavigation();

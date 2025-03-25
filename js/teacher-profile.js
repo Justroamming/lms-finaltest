@@ -15,6 +15,8 @@ class TeacherProfile  {
 
     async init() {
         await this.loadProfile();
+
+        
     }
 
     async loadProfile() {
@@ -172,6 +174,9 @@ class TeacherProfile  {
 
     async printProfile() {
         try {
+            
+
+
             const printContent = `
                 <div class="print-profile" style="padding: 20px; font-family: Arial, sans-serif;">
                     <h2 style="text-align: center; color: #333;">HỒ SƠ GIÁO VIÊN</h2>
@@ -302,6 +307,8 @@ class TeacherProfile  {
         }, 5000);
     }
     
+    
+
     setupModalHandlers() {
         document.body.addEventListener('show.bs.modal', function () {
             document.body.style.overflow = 'auto';

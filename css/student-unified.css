@@ -132,7 +132,11 @@ ul {
     color: rgba(255, 255, 255, 0.7);
     font-weight: 400;
 }
-
+.badge{
+    color:blue !important;
+    background-color: greenyellow !important;
+    font-size: 15px !important;
+}
 .logout-btn {
     background-color: transparent;
     border: none;

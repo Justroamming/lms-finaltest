@@ -10,27 +10,50 @@ document.addEventListener('DOMContentLoaded', () => {
             const password = document.getElementById('password').value;
 
             try {
+                const loginButton = document.getElementById('loginButton');
+                if (loginButton) loginButton.classList.add('loading');
+                
                 const loginSuccess = await login(email, password);
+
+                if (loginButton) loginButton.classList.remove('loading');
 
                 if (loginSuccess) {
                     const currentUser = getCurrentUser();
                     localStorage.setItem('token', currentUser.token);
-
-                    if (currentUser.role === 'Admin') {
-                        window.location.href = 'admin-dashboard.html';
+                    
+                    // Hiển thị thông báo thành công nếu hàm showNotification tồn tại
+                    if (typeof window.showNotification === 'function') {
+                        window.showNotification('success', 'Đăng nhập thành công!');
                     }
-                    if (currentUser.role === 'Teacher') {
-                        window.location.href = 'teacher-dashboard.html';
-                    }
-                    if (currentUser.role === 'Student') {
-                        window.location.href = 'student-dashboard.html';
-                    }
+                    
+                    // Chuyển hướng sau khi đăng nhập thành công
+                    setTimeout(() => {
+                        if (currentUser.role === 'Admin') {
+                            window.location.href = 'admin-dashboard.html';
+                        }
+                        if (currentUser.role === 'Teacher') {
+                            window.location.href = 'teacher-dashboard.html';
+                        }
+                        if (currentUser.role === 'Student') {
+                            window.location.href = 'student-dashboard.html';
+                        }
+                    }, 1500);
                 } else {
-                    alert('Email hoặc mật khẩu không đúng!');
+                    // Hiển thị thông báo lỗi nếu hàm showNotification tồn tại
+                    if (typeof window.showNotification === 'function') {
+                        window.showNotification('error', 'Sai tên đăng nhập hoặc mật khẩu!');
+                    }
+                    console.error('Email hoặc mật khẩu không đúng!');
                 }
             } catch (error) {
+                const loginButton = document.getElementById('loginButton');
+                if (loginButton) loginButton.classList.remove('loading');
+                
+                // Hiển thị thông báo lỗi nếu hàm showNotification tồn tại
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification('error', 'Lỗi đăng nhập: ' + error.message);
+                }
                 console.error('Error during login:', error);
-                alert('Đã xảy ra lỗi, vui lòng thử lại sau!');
             }
         });
     } else {

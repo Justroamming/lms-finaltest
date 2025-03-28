@@ -1102,7 +1102,7 @@ class TeacherScores {
                                         <option value="">Tất cả loại điểm</option>
                                         <option value="Final">Cuối kì</option>
                                         <option value="MidTerm">Giữa kì</option>
-                                        <option value="Component Score">Miệng</option>
+                                        <option value="Component Score">Điểm thành Phần</option>
                                     </select>
                                 </div>
                                 
@@ -1194,7 +1194,7 @@ class TeacherScores {
                         <option value="">Tất cả loại điểm</option>
                         <option value="Final">Cuối kì</option>
                         <option value="MidTerm">Giữa kì</option>
-                        <option value="Component Score">Miệng</option>
+                        <option value="Component Score">Điểm thành phần</option>
                     </select>
                 </div>
                 
@@ -1285,7 +1285,7 @@ class TeacherScores {
                         <option value="">Tất cả loại điểm</option>
                         <option value="Final">Cuối kì</option>
                         <option value="MidTerm">Giữa kì</option>
-                        <option value="Component Score">Miệng</option>
+                        <option value="Component Score">Điểm Thành Phần</option>
                     </select>
                 </div>
                 

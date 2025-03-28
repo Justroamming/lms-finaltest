@@ -1,10 +1,10 @@
 class StudentScores {
     constructor() {
-        this.token=localStorage.getItem('token');
+        this.token = localStorage.getItem('token');
         const currentUser = sessionStorage.getItem('currentUser');
-        // Store the entire user object
         this.student = JSON.parse(currentUser);
-        this.allScores = []; // Lưu trữ tất cả điểm để tiện lọc
+        this.allScores = []; // Store all grades
+        this.overallScore = null; // Store overall average score
         this.init();
     }
 
@@ -15,13 +15,10 @@ class StudentScores {
 
     initializeFilters() {
         try {
-            // Lấy các phần tử filter
             const subjectFilter = document.getElementById('subjectFilter');
             const scoreFilter = document.getElementById('scoreFilter');
-         
 
             if (subjectFilter && this.allScores.length > 0) {
-                // Tạo danh sách môn học unique từ score.subjectName
                 const subjects = [...new Set(this.allScores.map(score => score.subjectName))];
                 subjectFilter.innerHTML = `
                     <option value="">Tất cả môn</option>
@@ -29,10 +26,8 @@ class StudentScores {
                 `;
             }
 
-            // Thêm event listeners
             subjectFilter?.addEventListener('change', () => this.applyFilters());
             scoreFilter?.addEventListener('change', () => this.applyFilters());
-            
         } catch (error) {
             console.error('Lỗi khi khởi tạo bộ lọc:', error);
         }
@@ -42,18 +37,13 @@ class StudentScores {
         try {
             const subjectFilter = document.getElementById('subjectFilter').value;
             const scoreFilter = document.getElementById('scoreFilter').value;
-        
 
             let filteredScores = [...this.allScores];
 
-            // Lọc theo môn học (using subjectName for consistency)
             if (subjectFilter) {
                 filteredScores = filteredScores.filter(score => score.subjectName === subjectFilter);
             }
 
-          
-
-            // Lọc theo điểm số
             if (scoreFilter) {
                 switch (scoreFilter) {
                     case 'high':
@@ -78,23 +68,36 @@ class StudentScores {
 
     async loadScores() {
         try {
-            // Note: Adjust the URL if needed based on your API endpoint.
-            const response = await fetch(`https://localhost:7231/ScoreStudentss/GetAllGradesOfAStudent?id=${this.student.studentId}`, {
+            // Fetch all grades
+            const gradesResponse = await fetch(`https://localhost:7231/DashboardStudents/GetAllGradesOfAStudent?id=${this.student.studentId}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
                     'Content-Type': 'application/json'
                 }
             });
-            const scores = await response.json();
-            this.allScores = scores;
+            if (!gradesResponse.ok) throw new Error(`Grades API error: ${gradesResponse.status}`);
+            const grades = await gradesResponse.json();
+            this.allScores = grades;
 
+            // Fetch overall average score
+            const averageResponse = await fetch(`https://localhost:7231/DashboardStudents/GetStudentOverallAverageScore?id=${this.student.studentId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!averageResponse.ok) throw new Error(`Average Score API error: ${averageResponse.status}`);
+            const averageData = await averageResponse.json();
+            this.overallScore = averageData.length > 0 ? averageData[0] : null; // Assuming one record per student
+
+            // Render and update UI with fetched data
             this.renderScoresTable(this.allScores);
             this.updateStatistics(this.allScores);
             this.updateAcademicSummary(this.allScores);
-            this.initializeFilters(); // Khởi tạo lại bộ lọc sau khi có dữ liệu
         } catch (error) {
-            console.error('Lỗi khi tải điểm:', error);
+            console.error('Lỗi khi tải dữ liệu:', error);
         }
     }
 
@@ -108,13 +111,13 @@ class StudentScores {
                     <td>${score.subjectName}</td>
                     <td>${score.testType}</td>
                     <td>${score.score}</td>
-                    <td>${score.gradeDate}</td>
+                    <td>${new Date(score.gradeDate).toLocaleDateString()}</td>
                 </tr>
             `).join('');
         } else {
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="6" class="text-center">Chưa có điểm</td>
+                    <td colspan="4" class="text-center">Chưa có điểm</td>
                 </tr>
             `;
         }
@@ -124,54 +127,45 @@ class StudentScores {
         try {
             const stats = {
                 totalScores: scores.length,
-                averageScore: 0,
+                averageScore: this.overallScore ? this.overallScore.overallAverageScore : 0,
                 highestScore: 0,
-                lowestScore: 10,
+                lowestScore: 0,
                 passRate: 0
             };
-    
+
             if (scores.length > 0) {
-                const sum = scores.reduce((acc, score) => acc + score.score, 0);
-                stats.averageScore = (sum / scores.length) ; // Chia cho 10
-    
                 stats.highestScore = Math.max(...scores.map(score => score.score));
                 stats.lowestScore = Math.min(...scores.map(score => score.score));
-    
                 const passedScores = scores.filter(score => score.score >= 4.0);
                 stats.passRate = (passedScores.length / scores.length) * 100;
             }
-    
+
             const elements = {
                 totalScores: document.getElementById('totalScores'),
                 highestScore: document.getElementById('highestScore'),
                 lowestScore: document.getElementById('lowestScore'),
                 passRate: document.getElementById('passRate')
             };
-    
+
             if (elements.totalScores) elements.totalScores.textContent = stats.totalScores;
             if (elements.highestScore) elements.highestScore.textContent = stats.highestScore.toFixed(1);
             if (elements.lowestScore) elements.lowestScore.textContent = stats.lowestScore.toFixed(1);
             if (elements.passRate) elements.passRate.textContent = `${stats.passRate.toFixed(1)}%`;
-    
         } catch (error) {
             console.error('Lỗi khi cập nhật thống kê:', error);
         }
     }
-    
+
     updateAcademicSummary(scores) {
         try {
             const summary = {
-                averageGrade: 0,
+                averageGrade: this.overallScore ? this.overallScore.overallAverageScore : 0,
                 academicRanking: '-',
                 passedSubjects: 0
             };
-    
+
             if (scores.length > 0) {
-                const sum = scores.reduce((acc, score) => acc + score.score, 0);
-                summary.averageGrade = (sum / scores.length) ; // Chia cho 10
-    
                 summary.academicRanking = this.getAcademicRanking(summary.averageGrade);
-    
                 const uniqueSubjects = [...new Set(scores.map(score => score.subjectName))];
                 const passedSubjects = uniqueSubjects.filter(subject => {
                     const subjectScores = scores.filter(score => score.subjectName === subject);
@@ -180,22 +174,16 @@ class StudentScores {
                 });
                 summary.passedSubjects = passedSubjects.length;
             }
-    
+
             const elements = {
                 averageGrade: document.getElementById('averageGrade'),
                 academicRanking: document.getElementById('academicRanking'),
                 passedSubjects: document.getElementById('passedSubjects')
             };
-    
-            if (elements.averageGrade) {
-                elements.averageGrade.textContent = summary.averageGrade.toFixed(1);
-            }
-            if (elements.academicRanking) {
-                elements.academicRanking.textContent = summary.academicRanking;
-            }
-            if (elements.passedSubjects) {
-                elements.passedSubjects.textContent = summary.passedSubjects.toString();
-            }
+
+            if (elements.averageGrade) elements.averageGrade.textContent = summary.averageGrade.toFixed(1);
+            if (elements.academicRanking) elements.academicRanking.textContent = summary.academicRanking;
+            if (elements.passedSubjects) elements.passedSubjects.textContent = summary.passedSubjects;
         } catch (error) {
             console.error('Lỗi khi cập nhật tổng kết học tập:', error);
         }
@@ -210,8 +198,6 @@ class StudentScores {
     }
 }
 
-
-// Khởi tạo khi trang load
 document.addEventListener('DOMContentLoaded', () => {
     window.studentScores = new StudentScores();
 });

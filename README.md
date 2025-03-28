@@ -5,7 +5,7 @@ Chào mừng bạn đến với **LMS (Hệ thống Quản lý Học tập)**! �
 1. Tải xuống mã nguồn.
 => Clone qua git, trước đó hãy cài git trước
 ```
-git clone https://github.com/Justroamming/Lms.git
+git clone https://github.com/Justroamming/lms-finaltest.git
 ```
 2. Mở dự án bằng live server.
 

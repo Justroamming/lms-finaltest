@@ -67,7 +67,7 @@
     </div>
 
     <script src="js/login.js"></script>
-    <script src="js/data-service.js"></script>
+    
     <script src="js/base-component.js"></script>
     <script src="js/teacher-profile.js"></script>
     <script src="js/teacher-scores.js"></script>
@@ -85,7 +85,6 @@
                 window.location.href = 'login.html';
             }
             
-            console.log('Khởi tạo TeacherNavigation...');
             window.navigationInstance = new TeacherNavigation();
             
             // Xử lý menu trên thiết bị di động
@@ -123,11 +122,8 @@
                 }
             });
             
-            // Đảm bảo thông tin vai trò được hiển thị sau khi trang tải xong
-            console.log('Đợi 1 giây trước khi hiển thị thông tin giáo viên...');
             setTimeout(() => {
                 if (window.navigationInstance) {
-                    console.log('Gọi displayTeacherName...');
                     window.navigationInstance.displayTeacherName();
                 }
             }, 1000);

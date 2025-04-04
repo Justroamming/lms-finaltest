@@ -262,7 +262,6 @@
         // Kiểm tra và hiển thị thông báo test để debug
         window.addEventListener('load', function() {
             setTimeout(() => {
-                console.log("Debug: Kiểm tra popup notification");
                 const hasError = new URLSearchParams(window.location.search).get('error');
                 if (hasError) {
                     showNotification('error', 'Sai tên đăng nhập hoặc mật khẩu!');
@@ -280,7 +279,6 @@
             const currentUser = getCurrentUser();
             if (currentUser && currentUser.token) {
                 // Đã đăng nhập, chuyển hướng dựa vào vai trò
-                console.log("Phát hiện người dùng đã đăng nhập:", currentUser.role);
                 setTimeout(() => {
                     if (currentUser.role === 'Admin') {
                         window.location.href = 'admin-dashboard.html';

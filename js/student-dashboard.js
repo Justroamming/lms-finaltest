@@ -11,7 +11,7 @@ class StudentDashboard {
             const studentId = currentUser ? JSON.parse(currentUser).studentId : null;
             if (!studentId) throw new Error('Không tìm thấy ID học sinh');
 
-            const response = await fetch(`https://localhost:7231/DashboardStudents/GetStudentById?id=${studentId}`, {
+            const response = await fetch(`https://scoreapi-1zqy.onrender.com/DashboardStudents/GetStudentById?id=${studentId}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -36,7 +36,6 @@ class StudentDashboard {
         this.loadDashboardStats();
         this.loadRecentScores();
         this.loadUpcomingExams();
-     //   this.loadSubjectProgress();
         this.updateDateTime();
     }
 
@@ -80,7 +79,7 @@ class StudentDashboard {
     
         try {
             // Fetch overall stats
-            const response = await fetch(`https://localhost:7231/DashboardStudents/GetStudentOverallAverageScore?id=${this.student.studentId}`, {
+            const response = await fetch(`https://scoreapi-1zqy.onrender.com/DashboardStudents/GetStudentOverallAverageScore?id=${this.student.studentId}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -102,7 +101,7 @@ class StudentDashboard {
                 stats.overallAverageScore ? parseFloat(stats.overallAverageScore).toFixed(2) : '0.00';
     
             // Fetch future test dates
-            const testResponse = await fetch(`https://localhost:7231/DashboardStudents/GetFutureTestsOfAStudent?id=${this.student.studentId}`, {
+            const testResponse = await fetch(`https://scoreapi-1zqy.onrender.com/DashboardStudents/GetFutureTestsOfAStudent?id=${this.student.studentId}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -113,8 +112,6 @@ class StudentDashboard {
     
             const tests = await testResponse.json();
     
-            console.log("Fetched test dates:", tests); // Debugging line
-    
             let daysToExam = 'N/A';
             if (Array.isArray(tests) && tests.length > 0) {
                 // Ensure testDate is correctly accessed
@@ -124,16 +121,13 @@ class StudentDashboard {
                 tests.sort((a, b) => new Date(a.testDate) - new Date(b.testDate));
     
                 const nearestTestDate = new Date(tests[0].testDate);
-                console.log("Nearest test date:", nearestTestDate.toISOString()); // Debugging line
     
                 // Get today's date (UTC)
                 const today = new Date();
                 today.setUTCHours(0, 0, 0, 0);
-                console.log("Today's date (UTC):", today.toISOString()); // Debugging line
-    
+
                 // Calculate remaining days
                 const remainingDays = Math.ceil((nearestTestDate - today) / (1000 * 60 * 60 * 24));
-                console.log("Remaining days:", remainingDays); // Debugging line
     
                 // Only show if days are positive
                 daysToExam = remainingDays >= 0 ? remainingDays : 'N/A';
@@ -157,7 +151,7 @@ class StudentDashboard {
         }
 
         try {
-            const response = await fetch(`https://localhost:7231/DashboardStudents/GetAllGradesOfAStudent?id=${this.student.studentId}`, {
+            const response = await fetch(`https://scoreapi-1zqy.onrender.com/DashboardStudents/GetAllGradesOfAStudent?id=${this.student.studentId}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -195,7 +189,7 @@ class StudentDashboard {
 
     async loadUpcomingExams() {
         try {
-            const response = await fetch(`https://localhost:7231/DashboardStudents/GetFutureTestsOfAStudent?id=${this.student.studentId}`, {
+            const response = await fetch(`https://scoreapi-1zqy.onrender.com/DashboardStudents/GetFutureTestsOfAStudent?id=${this.student.studentId}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,

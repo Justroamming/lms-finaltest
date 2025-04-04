@@ -69,7 +69,7 @@ class StudentScores {
     async loadScores() {
         try {
             // Fetch all grades
-            const gradesResponse = await fetch(`https://localhost:7231/DashboardStudents/GetAllGradesOfAStudent?id=${this.student.studentId}`, {
+            const gradesResponse = await fetch(`https://scoreapi-1zqy.onrender.com/DashboardStudents/GetAllGradesOfAStudent?id=${this.student.studentId}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -81,7 +81,7 @@ class StudentScores {
             this.allScores = grades;
 
             // Fetch overall average score
-            const averageResponse = await fetch(`https://localhost:7231/DashboardStudents/GetStudentOverallAverageScore?id=${this.student.studentId}`, {
+            const averageResponse = await fetch(`https://scoreapi-1zqy.onrender.com/DashboardStudents/GetStudentOverallAverageScore?id=${this.student.studentId}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,

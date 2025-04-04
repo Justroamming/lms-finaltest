@@ -1,7 +1,7 @@
 class TeacherScores {
     constructor() {
         this.token= localStorage.getItem('token');
-        this.apiBaseUrl = 'https://localhost:7231/ScoreTeachers'; // URL cơ sở API
+        this.apiBaseUrl = 'https://scoreapi-1zqy.onrender.com/ScoreTeachers'; // URL cơ sở API
         
         try {
             

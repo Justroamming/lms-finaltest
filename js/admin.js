@@ -172,7 +172,7 @@ class AdminDashboard {
     async initializeStudentDistributionChart() {
         try {
             // Lấy dữ liệu lớp học và số lượng học sinh
-            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+            const cohortsResponse = await fetch('https://scoreapi-1zqy.onrender.com/RealAdmins/GetAllCohorts', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -184,7 +184,7 @@ class AdminDashboard {
 
             // Lấy số lượng học sinh cho mỗi lớp
             const studentCounts = await Promise.all(cohorts.map(async (cohort) => {
-                const response = await fetch(`https://localhost:7231/RealAdmins/GetNumOfStudentsInACohort?id=${cohort.cohortId}`, {
+                const response = await fetch(`https://scoreapi-1zqy.onrender.com/RealAdmins/GetNumOfStudentsInACohort?id=${cohort.cohortId}`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${this.token}`,
@@ -270,7 +270,7 @@ class AdminDashboard {
     async updateQuickStats() {
         try {
             // Lấy tất cả học sinh
-            const studentsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllStudents', {
+            const studentsResponse = await fetch('https://scoreapi-1zqy.onrender.com/RealAdmins/GetAllStudents', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -302,7 +302,7 @@ class AdminDashboard {
             }
 
             // Lấy thông tin về lớp học
-            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+            const cohortsResponse = await fetch('https://scoreapi-1zqy.onrender.com/RealAdmins/GetAllCohorts', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -314,7 +314,7 @@ class AdminDashboard {
 
             // Lấy số lượng học sinh cho mỗi lớp
             const cohortStats = await Promise.all(cohorts.map(async (cohort) => {
-                const response = await fetch(`https://localhost:7231/RealAdmins/GetNumOfStudentsInACohort?id=${cohort.cohortId}`, {
+                const response = await fetch(`https://scoreapi-1zqy.onrender.com/RealAdmins/GetNumOfStudentsInACohort?id=${cohort.cohortId}`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${this.token}`,
@@ -374,7 +374,7 @@ class AdminDashboard {
     }
 
     async loadCohortsForSelect() {
-        const response = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+        const response = await fetch('https://scoreapi-1zqy.onrender.com/RealAdmins/GetAllCohorts', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${this.token}`,
@@ -392,7 +392,7 @@ class AdminDashboard {
     
     async loadStudents() {
         try {
-            const response = await fetch('https://localhost:7231/RealAdmins/GetAllStudents', {
+            const response = await fetch('https://scoreapi-1zqy.onrender.com/RealAdmins/GetAllStudents', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -405,7 +405,7 @@ class AdminDashboard {
             const data = await response.json();
             const students = data.data || []; 
     
-            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+            const cohortsResponse = await fetch('https://scoreapi-1zqy.onrender.com/RealAdmins/GetAllCohorts', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -568,7 +568,7 @@ class AdminDashboard {
                     this.showNotification('info', 'Đang tải dữ liệu', 'Vui lòng đợi trong giây lát...', null);
                     
                     // Gọi API để lấy thông tin học sinh
-                    const response = await fetch(`https://localhost:7231/RealAdmins/GetStudentById?id=${studentId}`, {
+                    const response = await fetch(`https://scoreapi-1zqy.onrender.com/RealAdmins/GetStudentById?id=${studentId}`, {
                         method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${this.token}`,
@@ -759,7 +759,7 @@ class AdminDashboard {
 
     async loadTeachers() {
         try {
-            const response = await fetch('https://localhost:7231/RealAdmins/GetAllTeacher', {
+            const response = await fetch('https://scoreapi-1zqy.onrender.com/RealAdmins/GetAllTeacher', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -887,7 +887,7 @@ class AdminDashboard {
                     this.showNotification('info', 'Đang tải dữ liệu', 'Vui lòng đợi trong giây lát...', null);
                     
                     // Gọi API để lấy thông tin giáo viên
-                    const response = await fetch(`https://localhost:7231/RealAdmins/GetTeacherById?id=${teacherId}`, {
+                    const response = await fetch(`https://scoreapi-1zqy.onrender.com/RealAdmins/GetTeacherById?id=${teacherId}`, {
                         method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${this.token}`,
@@ -1047,7 +1047,7 @@ class AdminDashboard {
 
     async loadCohorts() {
         try {
-            const response = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+            const response = await fetch('https://scoreapi-1zqy.onrender.com/RealAdmins/GetAllCohorts', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -1065,7 +1065,7 @@ class AdminDashboard {
             // Get student counts for each cohort
             const studentCounts = await Promise.all(cohorts.map(async (co) => {
                 try {
-                    const res = await fetch(`https://localhost:7231/RealAdmins/GetNumOfStudentsInACohort?id=${co.cohortId}`, {
+                    const res = await fetch(`https://scoreapi-1zqy.onrender.com/RealAdmins/GetNumOfStudentsInACohort?id=${co.cohortId}`, {
                         method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${this.token}`,
@@ -1115,7 +1115,7 @@ class AdminDashboard {
 
     async printStudentInfo(cohortId) {
         try {
-            const res = await fetch(`https://localhost:7231/RealAdmins/GetStudentsInCohort?id=${cohortId}`, {
+            const res = await fetch(`https://scoreapi-1zqy.onrender.com/RealAdmins/GetStudentsInCohort?id=${cohortId}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -1279,7 +1279,7 @@ class AdminDashboard {
                     this.showNotification('info', 'Đang tải dữ liệu', 'Vui lòng đợi trong giây lát...', null);
                     
                     // Gọi API để lấy thông tin lớp học
-                    const response = await fetch(`https://localhost:7231/RealAdmins/GetCohortById?id=${cohortId}`, {
+                    const response = await fetch(`https://scoreapi-1zqy.onrender.com/RealAdmins/GetCohortById?id=${cohortId}`, {
                         method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${this.token}`,
@@ -1386,8 +1386,8 @@ class AdminDashboard {
 
         const isUpdating = Boolean(cohortData.cohortId);
         const url = isUpdating
-            ? `https://localhost:7231/RealAdmins/UpdateCohort?${params}`
-            : `https://localhost:7231/RealAdmins/InsertCohort?${params}`;
+            ? `https://scoreapi-1zqy.onrender.com/RealAdmins/UpdateCohort?${params}`
+            : `https://scoreapi-1zqy.onrender.com/RealAdmins/InsertCohort?${params}`;
 
         const method = isUpdating ? "PUT" : "POST";
 
@@ -1433,7 +1433,7 @@ class AdminDashboard {
     }
 
     async deleteCohortRequest(cohortId) {
-        const response = await fetch(`https://localhost:7231/RealAdmins/DeleteCohort?id=${cohortId}`, {
+        const response = await fetch(`https://scoreapi-1zqy.onrender.com/RealAdmins/DeleteCohort?id=${cohortId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${this.token}`,
@@ -1457,7 +1457,7 @@ class AdminDashboard {
 
     async loadSubjects() {
         try {
-            const response = await fetch('https://localhost:7231/RealAdmins/GetAllSubjects', {
+            const response = await fetch('https://scoreapi-1zqy.onrender.com/RealAdmins/GetAllSubjects', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -1612,8 +1612,8 @@ class AdminDashboard {
 
         const isUpdating = Boolean(subjectData.subjectId);
         const url = isUpdating
-            ? `https://localhost:7231/RealAdmins/UpdateASubject?${params}`
-            : `https://localhost:7231/RealAdmins/InsertASubject?${params}`;
+            ? `https://scoreapi-1zqy.onrender.com/RealAdmins/UpdateASubject?${params}`
+            : `https://scoreapi-1zqy.onrender.com/RealAdmins/InsertASubject?${params}`;
 
         const method = isUpdating ? "PUT" : "POST";
 
@@ -1655,7 +1655,7 @@ class AdminDashboard {
     }
     
     async deleteSubjectRequest(subjectId) {
-        const response = await fetch(`https://localhost:7231/RealAdmins/DeleteASubject?id=${subjectId}`, {
+        const response = await fetch(`https://scoreapi-1zqy.onrender.com/RealAdmins/DeleteASubject?id=${subjectId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${this.token}`,
@@ -1711,7 +1711,7 @@ class AdminDashboard {
 
     async loadAssignments() {
         try {
-            const response = await fetch('https://localhost:7231/RealAdmins/GetAllTeacherSchedule', {
+            const response = await fetch('https://scoreapi-1zqy.onrender.com/RealAdmins/GetAllTeacherSchedule', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -1725,7 +1725,7 @@ class AdminDashboard {
             const assignments = data || [];
 
             // Lấy thông tin giáo viên
-            const teachersResponse = await fetch('https://localhost:7231/RealAdmins/GetAllTeacher', {
+            const teachersResponse = await fetch('https://scoreapi-1zqy.onrender.com/RealAdmins/GetAllTeacher', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -1736,7 +1736,7 @@ class AdminDashboard {
             const teachers = teachersData.data || [];
 
             // Lấy thông tin môn học
-            const subjectsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllSubjects', {
+            const subjectsResponse = await fetch('https://scoreapi-1zqy.onrender.com/RealAdmins/GetAllSubjects', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -1747,7 +1747,7 @@ class AdminDashboard {
             const subjects = subjectsData.data || [];
 
             // Lấy thông tin lớp học
-            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+            const cohortsResponse = await fetch('https://scoreapi-1zqy.onrender.com/RealAdmins/GetAllCohorts', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -1806,7 +1806,7 @@ class AdminDashboard {
     async loadAssignmentFormData() {
         try {
             // Load danh sách giáo viên
-            const teachersResponse = await fetch('https://localhost:7231/RealAdmins/GetAllTeacher', {
+            const teachersResponse = await fetch('https://scoreapi-1zqy.onrender.com/RealAdmins/GetAllTeacher', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -1822,7 +1822,7 @@ class AdminDashboard {
             ).join('');
 
             // Load danh sách môn học
-            const subjectsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllSubjects', {
+            const subjectsResponse = await fetch('https://scoreapi-1zqy.onrender.com/RealAdmins/GetAllSubjects', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -1838,7 +1838,7 @@ class AdminDashboard {
             ).join('');
 
             // Load danh sách lớp học
-            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+            const cohortsResponse = await fetch('https://scoreapi-1zqy.onrender.com/RealAdmins/GetAllCohorts', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -1897,7 +1897,7 @@ class AdminDashboard {
         const dateInputs = form.querySelectorAll('input[type="date"]');
         
         if (lessonClassId) {
-            const response = await fetch(`https://localhost:7231/RealAdmins/GetLessonSchedulebyID?id=${lessonClassId}`, {
+            const response = await fetch(`https://scoreapi-1zqy.onrender.com/RealAdmins/GetLessonSchedulebyID?id=${lessonClassId}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -1968,8 +1968,8 @@ class AdminDashboard {
         });
     
         const url = isUpdating
-            ? `https://localhost:7231/RealAdmins/UpdateAssignedTeacher?${params}`
-            : `https://localhost:7231/RealAdmins/AssignTeacher?${params}`;
+            ? `https://scoreapi-1zqy.onrender.com/RealAdmins/UpdateAssignedTeacher?${params}`
+            : `https://scoreapi-1zqy.onrender.com/RealAdmins/AssignTeacher?${params}`;
 
     
         const method = isUpdating ? "PUT" : "POST";
@@ -1999,7 +1999,7 @@ class AdminDashboard {
                 'Bạn có chắc chắn muốn xóa phân công này không? Dữ liệu không thể khôi phục sau khi xóa.',
                 async () => {
         try {
-            const response = await fetch(`https://localhost:7231/RealAdmins/DeleteAssignedTeacher?lessonClassID=${lessonClassId}`, {
+            const response = await fetch(`https://scoreapi-1zqy.onrender.com/RealAdmins/DeleteAssignedTeacher?lessonClassID=${lessonClassId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -2051,7 +2051,7 @@ class AdminDashboard {
     async  getSystemStats() {   
         try {
             // Lấy dữ liệu hiện tại
-            const studentsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllStudents', {
+            const studentsResponse = await fetch('https://scoreapi-1zqy.onrender.com/RealAdmins/GetAllStudents', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -2061,7 +2061,7 @@ class AdminDashboard {
             const studentsData = await studentsResponse.json();
             const students = studentsData.data || [];
             
-            const teachersResponse = await fetch('https://localhost:7231/RealAdmins/GetAllTeacher', {
+            const teachersResponse = await fetch('https://scoreapi-1zqy.onrender.com/RealAdmins/GetAllTeacher', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -2071,7 +2071,7 @@ class AdminDashboard {
             const teachersData = await teachersResponse.json();
             const teachers = teachersData.data || [];
 
-            const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
+            const cohortsResponse = await fetch('https://scoreapi-1zqy.onrender.com/RealAdmins/GetAllCohorts', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.token}`,
@@ -2380,7 +2380,7 @@ class AdminDashboard {
 
     // Thêm phương thức deleteTeacherRequest
     async deleteTeacherRequest(teacherId) {
-        const response = await fetch(`https://localhost:7231/RealAdmins/DeleteTeacher?id=${teacherId}`, {
+        const response = await fetch(`https://scoreapi-1zqy.onrender.com/RealAdmins/DeleteTeacher?id=${teacherId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${this.token}`,
@@ -2595,8 +2595,8 @@ class AdminDashboard {
 
         const isUpdating = Boolean(studentData.studentId);
         const url = isUpdating
-            ? `https://localhost:7231/RealAdmins/UpdateStudent?${params}`
-            : `https://localhost:7231/RealAdmins/InsertStudent?${params}`;
+            ? `https://scoreapi-1zqy.onrender.com/RealAdmins/UpdateStudent?${params}`
+            : `https://scoreapi-1zqy.onrender.com/RealAdmins/InsertStudent?${params}`;
 
         const method = isUpdating ? "PUT" : "POST";
 
@@ -2614,7 +2614,7 @@ class AdminDashboard {
 
     // Thêm phương thức deleteStudentRequest 
     async deleteStudentRequest(studentId) {
-        const url = `https://localhost:7231/RealAdmins/DeleteStudent?id=${studentId}`;
+        const url = `https://scoreapi-1zqy.onrender.com/RealAdmins/DeleteStudent?id=${studentId}`;
         
         try {
             const response = await fetch(url, {
@@ -2660,8 +2660,8 @@ class AdminDashboard {
 
         const isUpdating = Boolean(teacherData.teacherId);
         const url = isUpdating
-            ? `https://localhost:7231/RealAdmins/UpdateTeacher?${params}`
-            : `https://localhost:7231/RealAdmins/InsertTeacher?${params}`;
+            ? `https://scoreapi-1zqy.onrender.com/RealAdmins/UpdateTeacher?${params}`
+            : `https://scoreapi-1zqy.onrender.com/RealAdmins/InsertTeacher?${params}`;
 
         const method = isUpdating ? "PUT" : "POST";
 
@@ -2679,7 +2679,7 @@ class AdminDashboard {
 
     // Giữ lại phương thức này và xóa bỏ phương thức trùng lặp sau đó
     async deleteTeacherRequest(teacherId) {
-        const response = await fetch(`https://localhost:7231/RealAdmins/DeleteTeacher?id=${teacherId}`, {
+        const response = await fetch(`https://scoreapi-1zqy.onrender.com/RealAdmins/DeleteTeacher?id=${teacherId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${this.token}`,

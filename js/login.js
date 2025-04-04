@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 const login = async (email, password) => {
     try {
-        const response = await fetch(`https://localhost:7231/Logins/LoginProcess?email=${email}&password=${password}`, {
+        const response = await fetch(`https://scoreapi-1zqy.onrender.com/Logins/LoginProcess?email=${email}&password=${password}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

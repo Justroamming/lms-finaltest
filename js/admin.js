@@ -24,9 +24,6 @@ class AdminDashboard {
         this.setupPopupHandlers();
 
         this.setupModalCloseHandlers();
-        
-        // Thêm log khởi tạo để debug
-        console.log('AdminDashboard đã được khởi tạo');
     }
 
     initializeNavigation() {
@@ -406,12 +403,7 @@ class AdminDashboard {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             const data = await response.json();
-    
-            console.log("API response:", data); 
-    
             const students = data.data || []; 
-    
-            console.log("Parsed students:", students); 
     
             const cohortsResponse = await fetch('https://localhost:7231/RealAdmins/GetAllCohorts', {
                 method: 'GET',
@@ -422,7 +414,6 @@ class AdminDashboard {
             });
             const cohortsData = await cohortsResponse.json();
             const cohorts = cohortsData.data; 
-            console.log("API Cohorts Response:", cohorts); 
 
             if (!Array.isArray(cohorts)) {
                console.error("Lỗi: API không trả về một mảng lớp!");
@@ -456,14 +447,10 @@ class AdminDashboard {
                     </td>
                 </tr>
             `}).join('');
-            
-            // Bỏ qua việc thêm event listeners trực tiếp vì sẽ xử lý thông qua event delegation ở setupStudentEventListeners
-            console.log('Student table updated with', students.length, 'rows');
         } catch (error) {
             console.error("Error loading students:", error);
         }
     }
-    
 
     setupStudentEventListeners() {
         document.getElementById('addStudentBtn')?.addEventListener('click', () => {
@@ -506,10 +493,8 @@ class AdminDashboard {
                 
                 // Xử lý tương ứng với loại nút
                 if (target.classList.contains('btn-edit')) {
-                    console.log('Edit student:', studentId);
                     this.openStudentModal(studentId);
                 } else if (target.classList.contains('btn-delete')) {
-                    console.log('Delete student from event delegation:', studentId);
                     this.deleteStudent(studentId);
                 }
             });
@@ -522,7 +507,6 @@ class AdminDashboard {
                     e.stopPropagation();
                     const studentId = button.dataset.id;
                     if (studentId) {
-                        console.log('Delete student from direct event:', studentId);
                         this.deleteStudent(studentId);
                     }
                 });
@@ -600,15 +584,11 @@ class AdminDashboard {
                     }
                     
                     const student = await response.json();
-                    console.log('Student data from API:', student);
                     
                     // Điền thông tin học sinh vào form
                     if (student) {
                         // Xử lý các trường hợp khác nhau của API
                         const studentData = student.data || student;
-                        
-                        // Log dữ liệu để kiểm tra
-                        console.log('Student data to fill form:', studentData);
                         
                         try {
                             // Form fields
@@ -654,19 +634,6 @@ class AdminDashboard {
                                     console.warn(`Lớp học với ID ${cohortId} không tồn tại trong danh sách dropdown`);
                                 }
                             }
-                            
-                            // Log các trường đã điền
-                            console.log('Form filled with the following values:', {
-                                lastName: lastNameField?.value,
-                                firstName: firstNameField?.value,
-                                email: emailField?.value,
-                                gender: genderField?.value,
-                                address: addressField?.value,
-                                dob: dobField?.value,
-                                phone: phoneField?.value,
-                                password: passwordField?.value,
-                                cohortId: cohortIdField?.value
-                            });
                         } catch (formError) {
                             console.error('Error filling form fields:', formError);
                         }
@@ -738,11 +705,7 @@ class AdminDashboard {
     
     
     async deleteStudent(studentId) {
-        console.log('deleteStudent called for ID:', studentId);
-        
         try {
-            // Log để kiểm tra popup trước khi hiển thị
-            console.log('Popup exists before showing:', !!document.getElementById('confirmationPopup'));
             this.checkPopupStatus(); // Kiểm tra trạng thái của popup hiện tại
             
             // Đảm bảo các phần tử popup tồn tại
@@ -753,12 +716,8 @@ class AdminDashboard {
                 'Xác nhận xóa học sinh',
                 'Bạn có chắc chắn muốn xóa học sinh này không? Dữ liệu không thể khôi phục sau khi xóa.',
                 async () => {
-                    console.log('Xác nhận xóa học sinh với ID:', studentId);
                     try {
-                        console.log('Bắt đầu gọi API xóa học sinh');
-                        await this.deleteStudentRequest(studentId);
-                        console.log('API xóa học sinh thành công');
-                        
+                        await this.deleteStudentRequest(studentId);                        
                         // Cập nhật danh sách học sinh
                         await this.loadStudents();
                         
@@ -781,9 +740,6 @@ class AdminDashboard {
             
             // Kiểm tra popup sau khi hiển thị
             setTimeout(() => {
-                console.log('Popup exists after showing:', !!document.getElementById('confirmationPopup'));
-                console.log('Popup visibility after showing:', 
-                    document.getElementById('confirmationPopup')?.style.visibility);
                 this.checkPopupStatus(); // Kiểm tra lại trạng thái popup
             }, 100);
             
@@ -796,14 +752,10 @@ class AdminDashboard {
         }
     }
 
-
-
     async initializeTeacherManagement() {
         await this.loadTeachers();
         this.setupTeacherEventListeners();
     }
-
-    
 
     async loadTeachers() {
         try {
@@ -818,12 +770,7 @@ class AdminDashboard {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             const data = await response.json();
-    
-            console.log("API response:", data);
-    
             const teachers = data.data || []; 
-    
-            console.log("Parsed students:", teachers); 
     
             const tbody = document.querySelector('#teacherTable tbody');
             tbody.innerHTML = teachers.map(teacher => `
@@ -836,7 +783,6 @@ class AdminDashboard {
                     <td>${teacher.address}</td>
                     <td>${teacher.dateOfBirth}</td>
                     <td>${teacher.password}</td>
-                   
                     <td>
                         <button class="btn-edit" data-id="${teacher.teacherId}">
                             <i class="fas fa-edit"></i>
@@ -878,10 +824,8 @@ class AdminDashboard {
                 
                 // Xử lý tương ứng với loại nút
                 if (target.classList.contains('btn-edit')) {
-                    console.log('Edit teacher:', teacherId);
                     this.openTeacherModal(teacherId);
                 } else if (target.classList.contains('btn-delete')) {
-                    console.log('Delete teacher:', teacherId);
                     this.deleteTeacher(teacherId);
                 }
                 
@@ -959,16 +903,11 @@ class AdminDashboard {
                     }
                     
                     const teacher = await response.json();
-                    console.log('Teacher data from API:', teacher);
                     
                     // Điền thông tin giáo viên vào form
                     if (teacher) {
                         // Xử lý các trường hợp khác nhau của API
-                        const teacherData = teacher.data || teacher;
-                        
-                        // Log dữ liệu để kiểm tra
-                        console.log('Teacher data to fill form:', teacherData);
-                        
+                        const teacherData = teacher.data || teacher;      
                         try {
                             // Form fields
                             const lastNameField = form.querySelector('[name="lastName"]');
@@ -1001,18 +940,6 @@ class AdminDashboard {
                             if (phoneField) phoneField.value = teacherData.phoneNumber || teacherData.phone || '';
                             
                             if (passwordField) passwordField.value = teacherData.password || '';
-                            
-                            // Log các trường đã điền
-                            console.log('Form filled with the following values:', {
-                                lastName: lastNameField?.value,
-                                firstName: firstNameField?.value,
-                                email: emailField?.value,
-                                gender: genderField?.value,
-                                address: addressField?.value,
-                                dob: dobField?.value,
-                                phone: phoneField?.value,
-                                password: passwordField?.value
-                            });
                         } catch (formError) {
                             console.error('Error filling form fields:', formError);
                         }
@@ -1112,14 +1039,11 @@ class AdminDashboard {
         }
     }
 
-
-
     async initializeCohortManagement() {
         await this.loadCohorts();
         this.setupCohortEventListeners();
         
     }
-
 
     async loadCohorts() {
         try {
@@ -1131,8 +1055,6 @@ class AdminDashboard {
                 }
             });
             const data = await response.json();
-            console.log("API Cohorts Response:", data);
-    
             const cohorts = data.data; 
     
             if (!Array.isArray(cohorts)) {
@@ -1265,12 +1187,6 @@ class AdminDashboard {
             alert("Không thể tải danh sách sinh viên!");
         }
     }
-    
-    
-    
-    
-    
-
 
     setupCohortEventListeners() {
         document.getElementById('addCohortBtn')?.addEventListener('click', () => {
@@ -1297,13 +1213,10 @@ class AdminDashboard {
                 
                 // Xử lý tương ứng với loại nút
                 if (target.classList.contains('btn-edit')) {
-                    console.log('Edit cohort:', cohortId);
                     this.openCohortModal(cohortId);
                 } else if (target.classList.contains('btn-delete')) {
-                    console.log('Delete cohort:', cohortId);
                     this.deleteCohort(cohortId);
                 } else if (target.classList.contains('btn-print')) {
-                    console.log('Print cohort:', cohortId);
                     this.printStudentInfo(cohortId);
                 }
                 
@@ -1382,15 +1295,11 @@ class AdminDashboard {
                     }
                     
                     const cohort = await response.json();
-                    console.log('Cohort data from API:', cohort);
                     
                     // Điền thông tin lớp học vào form
                     if (cohort) {
                         // Xử lý các trường hợp khác nhau của API
                         const cohortData = cohort.data || cohort;
-                        
-                        // Log dữ liệu để kiểm tra
-                        console.log('Cohort data to fill form:', cohortData);
                         
                         try {
                             // Form fields
@@ -1400,12 +1309,6 @@ class AdminDashboard {
                             // Điền dữ liệu vào từng trường nếu trường tồn tại và có dữ liệu
                             if (nameField) nameField.value = cohortData.cohortName;
                             if (descriptionField) descriptionField.value = cohortData.description;
-                            
-                            // Log các trường đã điền
-                            console.log('Form filled with the following values:', {
-                                name: nameField?.value,
-                                description: descriptionField?.value
-                            });
                         } catch (formError) {
                             console.error('Error filling form fields:', formError);
                         }
@@ -1561,9 +1464,7 @@ class AdminDashboard {
                     'Content-Type': 'application/json'
                 }
             });
-            const data = await response.json();
-            console.log("API Subjects Response:", data);
-    
+            const data = await response.json();    
             const subjects = data.data; 
     
             if (!Array.isArray(subjects)) {
@@ -1623,10 +1524,8 @@ class AdminDashboard {
                 if (!subjectId) return;
                 
                 if (target.classList.contains('btn-edit')) {
-                    console.log('Edit subject:', subjectId);
                     this.openSubjectModal(subjectId);
                 } else if (target.classList.contains('btn-delete')) {
-                    console.log('Delete subject:', subjectId);
                     this.deleteSubject(subjectId);
                 }
                 
@@ -1640,7 +1539,6 @@ class AdminDashboard {
         const modal = document.getElementById('subjectModal');
         const form = document.getElementById('subjectForm');
         const modalTitle = document.getElementById('subjectModalTitle');
-        
 
         modalTitle.textContent = subjectId ? 'Chỉnh sửa môn học' : 'Thêm môn học mới';
         
@@ -1673,7 +1571,6 @@ class AdminDashboard {
         });
         
         try {
-            console.log('Dữ liệu môn học:', subjectData);
             // Xác thực dữ liệu
             if (!subjectData.subjectName) {
                 throw new Error('Vui lòng điền đầy đủ thông tin bắt buộc!');
@@ -1981,10 +1878,8 @@ class AdminDashboard {
                 if (!lessonClassId) return;
                 
                 if (target.classList.contains('btn-edit')) {
-                    console.log('Edit assignment:', lessonClassId);
                     this.openAssignmentModal(lessonClassId);
                 } else if (target.classList.contains('btn-delete')) {
-                    console.log('Delete assignment:', lessonClassId);
                     this.deleteAssignment(lessonClassId);
                 }
                 
@@ -1997,11 +1892,9 @@ class AdminDashboard {
     async openAssignmentModal(lessonClassId) {
         const modal = document.getElementById('assignmentModal');
         const form = document.getElementById('assignmentForm');
-        console.log("Lesson Class ID:", lessonClassId);
-        
+
         // Get all date input fields from the form
         const dateInputs = form.querySelectorAll('input[type="date"]');
-        console.log("Date input fields in form:", Array.from(dateInputs).map(el => el.name));
         
         if (lessonClassId) {
             const response = await fetch(`https://localhost:7231/RealAdmins/GetLessonSchedulebyID?id=${lessonClassId}`, {
@@ -2013,14 +1906,6 @@ class AdminDashboard {
             });
             const assignmentArray = await response.json();
             const assignment = assignmentArray[0]; // Access the first item in the array
-            console.log("Raw assignment data:", assignment);
-            
-            // Log all date fields in response
-            Object.keys(assignment).forEach(key => {
-                if (typeof assignment[key] === 'string' && assignment[key].includes('T')) {
-                    console.log(`Field "${key}" contains date value: ${assignment[key]}`);
-                }
-            });
             
             // First, try to map fields directly
             Object.keys(assignment).forEach(key => {
@@ -2033,7 +1918,6 @@ class AdminDashboard {
                         } else {
                             input.value = assignment[key] || '';
                         }
-                        console.log(`Set date field ${key} = ${input.value}`);
                     } else {
                         input.value = assignment[key] || '';
                     }
@@ -2048,7 +1932,6 @@ class AdminDashboard {
                 } else {
                     startDayInput.value = assignment.lessonDate;
                 }
-                console.log(`Set startDay = ${startDayInput.value} from lessonDate`);
             }
             
             // Or the other way around
@@ -2059,7 +1942,6 @@ class AdminDashboard {
                 } else {
                     lessonDateInput.value = assignment.startDay;
                 }
-                console.log(`Set lessonDate = ${lessonDateInput.value} from startDay`);
             }
         } else {
             form.reset();
@@ -2072,7 +1954,6 @@ class AdminDashboard {
         const form = document.getElementById('assignmentForm');
         const formData = new FormData(form);
         const assignmentData = Object.fromEntries(formData.entries());
-        console.log("Form Data:", assignmentData);
     
         const isUpdating = assignmentData.lessonClassId && assignmentData.lessonClassId.trim() !== "";
         const params = new URLSearchParams({
@@ -2167,66 +2048,6 @@ class AdminDashboard {
         }
     }
 
-    async initializeAccountManagement() {
-        await this.loadAccounts();
-        this.setupAccountEventListeners();
-    }
-
-    async loadAccounts() {
-        const teachersResponse = await fetch('https://localhost:7231/Teacher/GetAllTeacher', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${this.token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        const teachersData = await teachersResponse.json();
-        const teachers = teachersData.data || [];
-        const studentsResponse = await fetch('https://localhost:7231/Student/GetAllStudents', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${this.token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        const studentsData = await studentsResponse.json();
-        const students = studentsData.data || [];
-        const adminsResponse = await fetch('https://localhost:7231/Admin/GetAllAdmins', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${this.token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        const adminsData = await adminsResponse.json();
-        const admins = adminsData.data || [];
-        
-        const accounts = [
-            ...admins.map(a => ({...a, type: 'Admin'})),
-            ...teachers.map(t => ({...t, type: 'Giáo viên'})),
-            ...students.map(s => ({...s, type: 'Học sinh'}))
-        ];
-        
-        const tbody = document.querySelector('#accountTable tbody');
-        tbody.innerHTML = accounts.map(acc => `
-            <tr>
-                <td>${acc.email}</td>
-                <td>${acc.type}</td>
-                <td>${acc.lastName || ''} ${acc.firstName || ''}</td>
-       
-                <td>
-                    <button onclick="adminDashboard.resetPassword('${acc.email}')" class="btn-edit">
-                        <i class="fas fa-key"></i>
-                    </button>
-                    <button onclick="adminDashboard.toggleAccountStatus('${acc.email}')" class="btn-warning">
-                        <i class="fas fa-ban"></i>
-                    </button>
-                </td>
-            </tr>
-        `).join('');
-    }
-
-    
     async  getSystemStats() {   
         try {
             // Lấy dữ liệu hiện tại
@@ -2582,7 +2403,6 @@ class AdminDashboard {
      * @param {Function} onConfirm - Hàm callback khi người dùng xác nhận
      */
     showConfirmation(title, message, onConfirm) {
-        console.log('showConfirmation called:', title, message);
         
         // Đảm bảo popup hiển thị đúng
         this.ensurePopupsExist();
@@ -2618,7 +2438,6 @@ class AdminDashboard {
             
             // Thêm sự kiện click mới
             newConfirmButton.addEventListener('click', () => {
-            console.log('Confirm button clicked');
                 this.hideConfirmation();
                 if (typeof onConfirm === 'function') {
                     onConfirm();
@@ -2631,7 +2450,6 @@ class AdminDashboard {
             cancelButton.parentNode.replaceChild(newCancelButton, cancelButton);
             
             newCancelButton.addEventListener('click', () => {
-                console.log('Cancel button clicked');
                 this.hideConfirmation();
             });
         }
@@ -2643,20 +2461,13 @@ class AdminDashboard {
         confirmationPopup.style.zIndex = '9999';
             confirmationPopup.classList.add('show');
         
-        // Debug thêm thông tin style
-        console.log('Popup confirmation displayed with styles:', {
-            display: window.getComputedStyle(confirmationPopup).display,
-            opacity: window.getComputedStyle(confirmationPopup).opacity,
-            visibility: window.getComputedStyle(confirmationPopup).visibility,
-            zIndex: window.getComputedStyle(confirmationPopup).zIndex
-        });
+        
     }
 
     /**
      * Ẩn popup xác nhận
      */
     hideConfirmation() {
-        console.log('hideConfirmation called');
         const confirmationPopup = document.getElementById('confirmationPopup');
         if (confirmationPopup) {
             // Xóa bỏ class và inline styles
@@ -2668,7 +2479,6 @@ class AdminDashboard {
             setTimeout(() => {
                 confirmationPopup.style.display = 'none';
             }, 300);
-            console.log('Popup confirmation hidden');
         } else {
             console.error('Không tìm thấy phần tử confirmationPopup');
         }
@@ -2682,8 +2492,6 @@ class AdminDashboard {
      * @param {Function} callback - Hàm callback khi đóng thông báo (optional)
      */
     showNotification(type, title, message, callback) {
-        console.log('showNotification called:', type, title, message);
-        
         // Đảm bảo popup tồn tại
         this.ensurePopupsExist();
         
@@ -2736,7 +2544,6 @@ class AdminDashboard {
             
             // Thêm sự kiện click mới
             newOkButton.addEventListener('click', () => {
-            console.log('OK button clicked');
                 this.hideNotification();
                 if (typeof callback === 'function') {
                     callback();
@@ -2749,20 +2556,12 @@ class AdminDashboard {
         notificationPopup.style.visibility = 'visible';
         notificationPopup.style.zIndex = '9999';
             notificationPopup.classList.add('show');
-        
-        console.log('Popup notification displayed with styles:', {
-            display: window.getComputedStyle(notificationPopup).display,
-            opacity: window.getComputedStyle(notificationPopup).opacity,
-            visibility: window.getComputedStyle(notificationPopup).visibility,
-            zIndex: window.getComputedStyle(notificationPopup).zIndex
-        });
     }
 
     /**
      * Ẩn popup thông báo
      */
     hideNotification() {
-        console.log('hideNotification called');
         const notificationPopup = document.getElementById('notificationPopup');
         if (notificationPopup) {
             // Xóa bỏ class và inline styles
@@ -2774,7 +2573,6 @@ class AdminDashboard {
             setTimeout(() => {
                 notificationPopup.style.display = 'none';
             }, 300);
-            console.log('Popup notification hidden');
         } else {
             console.error('Không tìm thấy phần tử notificationPopup');
         }
@@ -2816,9 +2614,7 @@ class AdminDashboard {
 
     // Thêm phương thức deleteStudentRequest 
     async deleteStudentRequest(studentId) {
-        console.log('Bắt đầu xóa học sinh với ID:', studentId);
         const url = `https://localhost:7231/RealAdmins/DeleteStudent?id=${studentId}`;
-        console.log('URL API xóa học sinh:', url);
         
         try {
             const response = await fetch(url, {
@@ -2828,18 +2624,12 @@ class AdminDashboard {
                 'Content-Type': 'application/json'
             }
         });
-            
-            console.log('Kết quả API xóa học sinh:', {
-                status: response.status,
-                statusText: response.statusText
-        });
 
         if (!response.ok) {
                 let errorMessage = `Lỗi xóa học sinh: ${response.status} ${response.statusText}`;
                 
                 try {
             const errorData = await response.json();
-                    console.error('Chi tiết lỗi từ API:', errorData);
                     errorMessage = errorData.message || errorMessage;
                 } catch (jsonError) {
                     console.error('Không thể đọc phản hồi lỗi dưới dạng JSON:', jsonError);
@@ -2847,8 +2637,6 @@ class AdminDashboard {
         
                 throw new Error(errorMessage);
             }
-            
-            console.log('Xóa học sinh thành công');
         return true;
         } catch (error) {
             console.error('Lỗi trong deleteStudentRequest:', error);
@@ -2909,11 +2697,8 @@ class AdminDashboard {
 
     // Kiểm tra và thêm các popup nếu chưa tồn tại
     ensurePopupsExist() {
-        console.log('Checking if popups exist...');
-        
         // Kiểm tra popup xác nhận
         if (!document.getElementById('confirmationPopup')) {
-            console.log('Adding confirmation popup to the DOM');
             const confirmationHTML = `
                 <div id="confirmationPopup" class="popup-overlay">
                     <div class="popup-content">
@@ -3053,7 +2838,6 @@ class AdminDashboard {
         
         // Kiểm tra popup thông báo
         if (!document.getElementById('notificationPopup')) {
-            console.log('Adding notification popup to the DOM');
             const notificationHTML = `
                 <div id="notificationPopup" class="popup-overlay">
                     <div class="popup-content">
@@ -3083,14 +2867,10 @@ class AdminDashboard {
                 });
             }
         }
-        
-        console.log('Popup check completed');
     }
 
     // Thêm phương thức kiểm tra trạng thái popup
-    checkPopupStatus() {
-        console.log('Checking popup status...');
-        
+    checkPopupStatus() {     
         const confirmationPopup = document.getElementById('confirmationPopup');
         const notificationPopup = document.getElementById('notificationPopup');
         
@@ -3125,8 +2905,6 @@ class AdminDashboard {
     
     // Phương thức hiển thị popup trực tiếp không thông qua animation
     forceShowConfirmation(title, message, onConfirm) {
-        console.log('forceShowConfirmation called with:', { title, message });
-        
         // Đảm bảo popup tồn tại
         this.ensurePopupsExist();
         
@@ -3158,13 +2936,11 @@ class AdminDashboard {
         
         // Gắn sự kiện
         newConfirmBtn.onclick = () => {
-            console.log('Confirm button clicked (forced)');
             this.hideConfirmation();
             onConfirm();
         };
         
         newCancelBtn.onclick = () => {
-            console.log('Cancel button clicked (forced)');
             this.hideConfirmation();
         };
         
@@ -3201,16 +2977,6 @@ class AdminDashboard {
         
         // Thêm class show để kích hoạt animation
         popup.classList.add('show');
-        
-        // Log thông tin chi tiết
-        console.log('Popup status after showing:', {
-            display: popup.style.display,
-            opacity: popup.style.opacity,
-            visibility: popup.style.visibility,
-            zIndex: popup.style.zIndex,
-            hasShowClass: popup.classList.contains('show'),
-            computedStyle: window.getComputedStyle(popup)
-        });
         
         // Kiểm tra lại sau 100ms
         setTimeout(() => {

@@ -71,7 +71,6 @@ class Navigation {
 
     async loadPage(page) {
         try {
-            console.log('Loading page:', page); // Debug log
             const response = await fetch(`components/student-${page}-content.html`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);

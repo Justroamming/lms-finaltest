@@ -388,7 +388,6 @@ class StudentProfile extends BaseComponent {
     }
 
     showToast(message, type) {
-        console.log("showToast() called with:", message, type);
         
         const toastContainer = document.getElementById("toastContainer"); 
         if (!toastContainer) {
@@ -404,7 +403,6 @@ class StudentProfile extends BaseComponent {
         
         setTimeout(() => {
             toast.remove();
-            console.log("Toast removed");
         }, 5000);
     }
     

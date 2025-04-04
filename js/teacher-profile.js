@@ -287,8 +287,6 @@ class TeacherProfile  {
     }
 
     showToast(message, type) {
-        console.log("showToast() called with:", message, type);
-        
         const toastContainer = document.getElementById("toastContainer"); 
         if (!toastContainer) {
             console.error("Không tìm thấy phần tử #toastcontainer trong DOM!");
@@ -303,7 +301,6 @@ class TeacherProfile  {
         
         setTimeout(() => {
             toast.remove();
-            console.log("Toast removed");
         }, 5000);
     }
     

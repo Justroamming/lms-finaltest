@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Score Management</title>
     <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <header class="header">
@@ -44,7 +45,69 @@
                     <p>Xuất báo cáo chi tiết</p>
                 </div>
             </div>
+            
+            <div class="interface-previews">
+                <h2>Giao diện hệ thống</h2>
+                <p class="section-subtitle">Trải nghiệm hệ thống quản lý điểm hiện đại và dễ sử dụng</p>
+                
+                <div class="tab-navigation">
+                    <button class="tab-button active" data-tab="admin">
+                        <i class="fas fa-user-shield"></i> Admin
+                    </button>
+                    <button class="tab-button" data-tab="teacher">
+                        <i class="fas fa-chalkboard-teacher"></i> Giáo viên
+                    </button>
+                    <button class="tab-button" data-tab="student">
+                        <i class="fas fa-user-graduate"></i> Học sinh
+                    </button>
+                </div>
+
+                <div class="tab-content">
+                    <div class="tab-pane active" id="admin">
+                        <div class="preview-content">
+                            <div class="preview-image">
+                                <img src="img/admin-preview.png" alt="Giao diện Admin">
+                            </div>
+                            <div class="preview-features">
+                                <h3>Giao diện Admin</h3>
+                                <p><i class="fas fa-check-circle"></i> Quản lý toàn bộ hệ thống và người dùng</p>
+                                <p><i class="fas fa-check-circle"></i> Phân quyền và theo dõi hoạt động</p>
+                                <p><i class="fas fa-check-circle"></i> Báo cáo tổng quan và phân tích dữ liệu</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="teacher">
+                        <div class="preview-content">
+                            <div class="preview-image">
+                                <img src="img/teacher-preview.png" alt="Giao diện Giáo viên">
+                            </div>
+                            <div class="preview-features">
+                                <h3>Giao diện Giáo viên</h3>
+                                <p><i class="fas fa-check-circle"></i> Nhập điểm và đánh giá học sinh</p>
+                                <p><i class="fas fa-check-circle"></i> Quản lý lớp học và danh sách học sinh</p>
+                                <p><i class="fas fa-check-circle"></i> Theo dõi tiến độ và thành tích học tập</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="student">
+                        <div class="preview-content">
+                            <div class="preview-image">
+                                <img src="img/student-preview.png" alt="Giao diện Học sinh">
+                            </div>
+                            <div class="preview-features">
+                                <h3>Giao diện Học sinh</h3>
+                                <p><i class="fas fa-check-circle"></i> Xem điểm số và kết quả học tập</p>
+                                <p><i class="fas fa-check-circle"></i> Theo dõi lịch học và thời khóa biểu</p>
+                                <p><i class="fas fa-check-circle"></i> Nhận thông báo và phản hồi từ giáo viên</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
+
 
         <section class="stats">
             <div class="stat-item" data-count="1">
